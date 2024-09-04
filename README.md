@@ -1,4 +1,4 @@
-# MCDMA
+# DFX
 Vivado/Vitis 2023.2
 
 ## FPGA/HW build:
