@@ -23,6 +23,12 @@ add_cells_to_pblock pblock_X1Y1 [get_cells [list top_bd_wrapper_inst/top_bd_i/ax
 create_pblock pblock_X0Y0
 resize_pblock pblock_X0Y0 -add CLOCKREGION_X0Y0:CLOCKREGION_X0Y0
 add_cells_to_pblock pblock_X0Y0 [get_cells [list top_bd_wrapper_inst/top_bd_i/led_cnt_wrapper_0]] -clear_locs
-add_cells_to_pblock pblock_X0Y0 [get_cells [list led_cnt_inst]] -clear_locs
+#add_cells_to_pblock pblock_X0Y0 [get_cells [list led_cnt_inst]] -clear_locs
 
+#--------------------------------------------------------------------------------------------------
+create_pblock pblock_x1y0
+#resize_pblock pblock_x1y0 -add {SLICE_X29Y0:SLICE_X48Y59 DSP48E2_X3Y0:DSP48E2_X4Y23 RAMB18_X3Y0:RAMB18_X5Y23 RAMB36_X3Y0:RAMB36_X5Y11}
+#resize_pblock pblock_x1y0 -add {SLICE_X32Y0:SLICE_X48Y56 DSP48E2_X3Y0:DSP48E2_X4Y21 RAMB18_X3Y0:RAMB18_X5Y21 RAMB36_X3Y0:RAMB36_X5Y10}
+resize_pblock pblock_x1y0 -add {SLICE_X36Y30:SLICE_X42Y43 DSP48E2_X3Y12:DSP48E2_X3Y15}
+add_cells_to_pblock pblock_x1y0 [get_cells [list led_cnt_inst]] -clear_locs
 
