@@ -58,13 +58,13 @@ logic [31:0]   timestamp;
     .led_wren_i         ('0               )
   );
 
-  led_cnt led_cnt_inst (
-    .rst    (~rstn        ),
-    .clk100 (clk100       ),
-    .div_i  (5'h2         ),
-    .wren_i ('0           ),
-    .led_o  (RADIO_LED[1] ) //BLUE
-  );
+//  led_cnt led_cnt_inst (
+//    .rst    (~rstn        ),
+//    .clk100 (clk100       ),
+//    .div_i  (5'h2         ),
+//    .wren_i ('0           ),
+//    .led_o  (RADIO_LED[1] ) //BLUE
+//  );
 
 	axil_reg32_A  #(
 		.C_S_AXI_DATA_WIDTH(32),
@@ -95,5 +95,18 @@ logic [31:0]   timestamp;
 		.S_AXI_RREADY   (M00_AXIL_rready  )
 	);
 
+  led_cnt_pr led_cnt_pr_inst (
+    .rst    (~rstn        ),
+    .clk100 (clk100       ),
+    .led_o  (RADIO_LED[1] ) //BLUE
+  );
 
 endmodule
+
+// blackbox definition
+//module led_cnt_pr (
+//  input   rst,
+//  input   clk100,
+//  output  led_o);
+//endmodule
+
