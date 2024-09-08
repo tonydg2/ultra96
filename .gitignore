@@ -2,9 +2,10 @@
 output_products*
 PRJ* 
 DEFAULT_PROJECT*
+RM_products*
 
-**vivado.log
-**vivado.jou
+**vivado*.log
+**vivado*.jou
 
 **/logs/
 **/workspace*/
