@@ -104,9 +104,9 @@ logic [31:0]   timestamp;
 endmodule
 
 // blackbox definition
-//module led_cnt_pr (
-//  input   rst,
-//  input   clk100,
-//  output  led_o);
-//endmodule
+module led_cnt_pr (
+  input   rst,
+  input   clk100,
+  output  led_o);
+endmodule
 
