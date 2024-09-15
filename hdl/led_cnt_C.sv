@@ -1,6 +1,6 @@
 // Verilog wrapper
 
-module led_cnt_pr_C (
+module led_cnt_pr (
   input         rst,
   input         clk100,
   output        led_o
@@ -17,7 +17,7 @@ module led_cnt_pr_C (
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  localparam [4:0] div_i = 5'h4;
+  localparam [4:0] div_i = 5'h9;
 
   localparam  [27:0]  CNT_1S = 28'h5F5E100;
   
