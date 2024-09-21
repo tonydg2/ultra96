@@ -51,8 +51,8 @@ int main()
     xil_printf("\n\rtesting adg2\n\r");
 
     versionCtrl0();
-    int val;
-    val = Xil_In32(PL_REG32_A_ADDR + 0x1C);
+    //int val;
+    //val = Xil_In32(PL_REG32_A_ADDR + 0x1C);
     
     
     
