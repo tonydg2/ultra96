@@ -54,7 +54,7 @@ logic [31:0]   timestamp;
     .clk100             (clk100           ),
     .rstn               (rstn             ),
     .led_div_i          ('0               ),
-    .led_o              (RADIO_LED[0]     ),//Yellow
+    .led_o              (bd_led),//RADIO_LED[0]     ),//Yellow
     .led_wren_i         ('0               )
   );
 
@@ -72,7 +72,10 @@ logic [31:0]   timestamp;
   ) axil_reg32_A_inst	(
     .git_hash       (git_hash         ),
     .timestamp      (timestamp        ),
-		.S_AXI_ACLK     (clk100           ),
+		.led            (bd_led           ),
+    .led3           (led3             ),
+    .led_sel        (led_sel          ),
+    .S_AXI_ACLK     (clk100           ),
 		.S_AXI_ARESETN  (rstn             ),
 		.S_AXI_AWADDR   (M00_AXIL_awaddr  ),
 		.S_AXI_AWPROT   (M00_AXIL_awprot  ),
@@ -101,12 +104,39 @@ logic [31:0]   timestamp;
     .led_o  (RADIO_LED[1] ) //BLUE
   );
 
+  led_cnt2_pr led_cnt2_pr_inst (
+    .rst    (~rstn        ),
+    .clk100 (clk100       ),
+    .led_o  (led2         )//Yellow
+  );
+
+  led_cnt3_pr led_cnt3_pr_inst (
+    .rst    (~rstn        ),
+    .clk100 (clk100       ),
+    .led_o  (led3         )
+  );
+
+  assign RADIO_LED[0] = (led_sel)? led3:led2;
+
 endmodule
 
-// blackbox definition
+// blackbox definition (only for DFX, otherwise remove)
 module led_cnt_pr (
   input   rst,
   input   clk100,
   output  led_o);
 endmodule
 
+// blackbox definition
+module led_cnt2_pr (
+  input   rst,
+  input   clk100,
+  output  led_o);
+endmodule
+
+// blackbox definition
+module led_cnt3_pr (
+  input   rst,
+  input   clk100,
+  output  led_o);
+endmodule

@@ -9,7 +9,11 @@
 	(
     input [63:0] git_hash,
     input [31:0] timestamp,
-		input wire  S_AXI_ACLK,
+		input         led,
+		input         led3,
+    output        led_sel,
+
+    input wire  S_AXI_ACLK,
 		input wire  S_AXI_ARESETN,
 		input wire [C_S_AXI_ADDR_WIDTH-1 : 0] S_AXI_AWADDR,
 		input wire [2 : 0] S_AXI_AWPROT,
@@ -607,7 +611,7 @@
 	        5'h03   : reg_data_out <= 32'hbaaf_deec;  //slv_reg3;   0xC
 	        5'h04   : reg_data_out <= 32'hdead_0666;  // 0x10
 	        5'h05   : reg_data_out <= timestamp; // 0x14
-	        5'h06   : reg_data_out <= slv_reg6; // 0x18
+	        5'h06   : reg_data_out <= {30'h0,led,led3};//slv_reg6; // 0x18
 	        5'h07   : reg_data_out <= slv_reg7; // 0x1C       
 	        5'h08   : reg_data_out <= slv_reg8; // 0x20    
 	        5'h09   : reg_data_out <= slv_reg9; // 0x24  
@@ -657,7 +661,7 @@
 	end    
 
 	// Add user logic here
-
+  assign led_sel = slv_reg7[0];
 	// User logic ends
 
 	endmodule
