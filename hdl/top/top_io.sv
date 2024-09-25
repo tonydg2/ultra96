@@ -196,6 +196,7 @@ dfx_axi_mgr dfx_axi_mgr_inst (
   //m_axi_mgr_arvalid  ),    // output wire m_axi_arvalid
   //m_axi_mgr_arready  )     // input wire m_axi_arready
 
+/*
 // without these assign statements, build still runs, put the connections at the AXI ILA get optimized out.
   assign s_axi_mgr_wready     = m_axi_mgr_wready ;
   assign s_axi_mgr_awaddr     = m_axi_mgr_awaddr ;
@@ -241,7 +242,7 @@ ila_axi0 ila_axi0_m (
 	.probe18(   s_axi_mgr_awprot    )   // input wire [2:0]  probe18
 );
 
-/*
+
 ila_axi0 ila_axi0_s (
 	.clk(clk100), // input wire clk
 	.probe0(    M00_AXIL_WREADY    ), // input wire [0:0] probe0  
