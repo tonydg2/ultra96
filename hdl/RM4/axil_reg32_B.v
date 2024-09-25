@@ -1,85 +1,38 @@
 
 `timescale 1 ns / 1 ps
 
-	module axil_reg32 #
+	module axil_reg32_2 #
 	(
-		// Users to add parameters here
-
-		// User parameters ends
-		// Do not modify the parameters beyond this line
-
-		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH	= 32,
-		// Width of S_AXI address bus
 		parameter integer C_S_AXI_ADDR_WIDTH	= 7
 	)
 	(
-		// Users to add ports here
-    input [63:0]  git_hash,
-    input [31:0]  timestamp,
-    output        dfx_active,
-		// User ports ends
-		// Do not modify the ports beyond this line
+    input [63:0] git_hash,
+    input [31:0] timestamp,
+		input         led,
+		input         led3,
+    output [1:0]  led_sel,
 
-		// Global Clock Signal
-		input wire  S_AXI_ACLK,
-		// Global Reset Signal. This Signal is Active LOW
+    input wire  S_AXI_ACLK,
 		input wire  S_AXI_ARESETN,
-		// Write address (issued by master, acceped by Slave)
 		input wire [C_S_AXI_ADDR_WIDTH-1 : 0] S_AXI_AWADDR,
-		// Write channel Protection type. This signal indicates the
-    		// privilege and security level of the transaction, and whether
-    		// the transaction is a data access or an instruction access.
 		input wire [2 : 0] S_AXI_AWPROT,
-		// Write address valid. This signal indicates that the master signaling
-    		// valid write address and control information.
 		input wire  S_AXI_AWVALID,
-		// Write address ready. This signal indicates that the slave is ready
-    		// to accept an address and associated control signals.
 		output wire  S_AXI_AWREADY,
-		// Write data (issued by master, acceped by Slave) 
 		input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
-		// Write strobes. This signal indicates which byte lanes hold
-    		// valid data. There is one write strobe bit for each eight
-    		// bits of the write data bus.    
 		input wire [(C_S_AXI_DATA_WIDTH/8)-1 : 0] S_AXI_WSTRB,
-		// Write valid. This signal indicates that valid write
-    		// data and strobes are available.
 		input wire  S_AXI_WVALID,
-		// Write ready. This signal indicates that the slave
-    		// can accept the write data.
 		output wire  S_AXI_WREADY,
-		// Write response. This signal indicates the status
-    		// of the write transaction.
 		output wire [1 : 0] S_AXI_BRESP,
-		// Write response valid. This signal indicates that the channel
-    		// is signaling a valid write response.
 		output wire  S_AXI_BVALID,
-		// Response ready. This signal indicates that the master
-    		// can accept a write response.
 		input wire  S_AXI_BREADY,
-		// Read address (issued by master, acceped by Slave)
 		input wire [C_S_AXI_ADDR_WIDTH-1 : 0] S_AXI_ARADDR,
-		// Protection type. This signal indicates the privilege
-    		// and security level of the transaction, and whether the
-    		// transaction is a data access or an instruction access.
 		input wire [2 : 0] S_AXI_ARPROT,
-		// Read address valid. This signal indicates that the channel
-    		// is signaling valid read address and control information.
 		input wire  S_AXI_ARVALID,
-		// Read address ready. This signal indicates that the slave is
-    		// ready to accept an address and associated control signals.
 		output wire  S_AXI_ARREADY,
-		// Read data (issued by slave)
 		output wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_RDATA,
-		// Read response. This signal indicates the status of the
-    		// read transfer.
 		output wire [1 : 0] S_AXI_RRESP,
-		// Read valid. This signal indicates that the channel is
-    		// signaling the required read data.
 		output wire  S_AXI_RVALID,
-		// Read ready. This signal indicates that the master can
-    		// accept the read data and response information.
 		input wire  S_AXI_RREADY
 	);
 
@@ -655,10 +608,10 @@
 	        5'h00   : reg_data_out <= git_hash[31: 0];//slv_reg0;   0x0
 	        5'h01   : reg_data_out <= git_hash[63:32];//slv_reg1;   0x4
 	        5'h02   : reg_data_out <= timestamp;      //slv_reg2;   0x8
-	        5'h03   : reg_data_out <= 32'hb00b_feed;  //slv_reg3;   0xC
-	        5'h04   : reg_data_out <= 32'hdead_beef;  // 0x10
+	        5'h03   : reg_data_out <= 32'h4321_BEEF;  //slv_reg3;   0xC
+	        5'h04   : reg_data_out <= 32'hFEED_0077;  // 0x10
 	        5'h05   : reg_data_out <= timestamp; // 0x14
-	        5'h06   : reg_data_out <= slv_reg6; // 0x18
+	        5'h06   : reg_data_out <= {30'h0,led,led3};//slv_reg6; // 0x18
 	        5'h07   : reg_data_out <= slv_reg7; // 0x1C       
 	        5'h08   : reg_data_out <= slv_reg8; // 0x20    
 	        5'h09   : reg_data_out <= slv_reg9; // 0x24  
@@ -708,7 +661,7 @@
 	end    
 
 	// Add user logic here
-  assign dfx_active = slv_reg6[0];
+  assign led_sel = slv_reg7[1:0];
 	// User logic ends
 
 	endmodule

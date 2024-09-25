@@ -3,9 +3,12 @@ output_products*
 PRJ* 
 DEFAULT_PROJECT*
 RM_products*
+/ip/*
+!/ip/tcl
 
 **vivado*.log
 **vivado*.jou
 
 **/logs/
 **/workspace*/
+sw/work*

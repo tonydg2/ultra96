@@ -47,3 +47,10 @@ add_cells_to_pblock led_cnt3_pr [get_cells [list led_cnt3_pr_inst]] -clear_locs
 #  create_pblock pblock_X0Y1
 #  resize_pblock pblock_X0Y1 -add CLOCKREGION_X1Y1:CLOCKREGION_X0Y1
 #  add_cells_to_pblock pblock_X0Y1 [get_cells [list axil_reg32_A_inst]] -clear_locs
+
+#--------------------------------------------------------------------------------------------------
+create_pblock axil_reg32_2
+resize_pblock axil_reg32_2 -add {SLICE_X0Y61:SLICE_X27Y89 DSP48E2_X0Y26:DSP48E2_X1Y35 RAMB18_X0Y26:RAMB18_X2Y35 RAMB36_X0Y13:RAMB36_X2Y17}
+add_cells_to_pblock axil_reg32_2 [get_cells [list axil_reg32_2_inst]]
+
+#--------------------------------------------------------------------------------------------------
