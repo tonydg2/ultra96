@@ -13,3 +13,4 @@ foreach x $delFils {
 }
 
 file delete $dir/axil_reg32_A.v
+
