@@ -11,3 +11,5 @@ if {$delFils == ""} {puts "NOTHING TO DO 2"}
 foreach x $delFils {
   file delete $x
 }
+
+file delete $dir/axil_reg32_A.v

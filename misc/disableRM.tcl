@@ -3,6 +3,7 @@ set dir "../hdl"
 file copy $dir/RM0/led_cnt_A.sv $dir/led_cnt_A.sv
 file copy $dir/RM1/led_cnt2_A.sv $dir/led_cnt2_A.sv
 file copy $dir/RM2/led_cnt3_A.sv $dir/led_cnt3_A.sv
+file copy $dir/RM4/axil_reg32_A.v $dir/axil_reg32_A.v
 
 
 set RMdirs [glob -directory $dir -type d RM*]
