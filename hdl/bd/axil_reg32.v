@@ -15,7 +15,12 @@
 	)
 	(
 		// Users to add ports here
-    input [63:0] git_hash,
+    input [63:0]  git_hash,
+    input [31:0]  timestamp,
+
+    output [4:0] led_div0_o,
+    output [4:0] led_div1_o,
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -650,38 +655,38 @@
 	begin
 	      // Address decoding for reading registers
 	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-	        5'h00   : reg_data_out <= git_hash[31: 0];//slv_reg0;
-	        5'h01   : reg_data_out <= git_hash[63:32];//slv_reg1;
-	        5'h02   : reg_data_out <= 32'hdead_beef;//slv_reg2;
-	        5'h03   : reg_data_out <= 32'hb00b_feed;//slv_reg3;
-	        5'h04   : reg_data_out <= slv_reg4;
-	        5'h05   : reg_data_out <= slv_reg5;
-	        5'h06   : reg_data_out <= slv_reg6;
-	        5'h07   : reg_data_out <= slv_reg7;
-	        5'h08   : reg_data_out <= slv_reg8;
-	        5'h09   : reg_data_out <= slv_reg9;
-	        5'h0A   : reg_data_out <= slv_reg10;
-	        5'h0B   : reg_data_out <= slv_reg11;
-	        5'h0C   : reg_data_out <= slv_reg12;
-	        5'h0D   : reg_data_out <= slv_reg13;
-	        5'h0E   : reg_data_out <= slv_reg14;
-	        5'h0F   : reg_data_out <= slv_reg15;
-	        5'h10   : reg_data_out <= slv_reg16;
-	        5'h11   : reg_data_out <= slv_reg17;
-	        5'h12   : reg_data_out <= slv_reg18;
-	        5'h13   : reg_data_out <= slv_reg19;
-	        5'h14   : reg_data_out <= slv_reg20;
-	        5'h15   : reg_data_out <= slv_reg21;
-	        5'h16   : reg_data_out <= slv_reg22;
-	        5'h17   : reg_data_out <= slv_reg23;
-	        5'h18   : reg_data_out <= slv_reg24;
-	        5'h19   : reg_data_out <= slv_reg25;
-	        5'h1A   : reg_data_out <= slv_reg26;
-	        5'h1B   : reg_data_out <= slv_reg27;
-	        5'h1C   : reg_data_out <= slv_reg28;
-	        5'h1D   : reg_data_out <= slv_reg29;
-	        5'h1E   : reg_data_out <= slv_reg30;
-	        5'h1F   : reg_data_out <= slv_reg31;
+	        5'h00   : reg_data_out <= git_hash[31: 0];//slv_reg0;   0x0
+	        5'h01   : reg_data_out <= git_hash[63:32];//slv_reg1;   0x4
+	        5'h02   : reg_data_out <= timestamp;      //slv_reg2;   0x8
+	        5'h03   : reg_data_out <= 32'hb00b_feed;  //slv_reg3;   0xC
+	        5'h04   : reg_data_out <= 32'hdead_beef;  // 0x10
+	        5'h05   : reg_data_out <= timestamp; // 0x14
+	        5'h06   : reg_data_out <= slv_reg6; // 0x18
+	        5'h07   : reg_data_out <= slv_reg7; // 0x1C       
+	        5'h08   : reg_data_out <= slv_reg8; // 0x20    
+	        5'h09   : reg_data_out <= slv_reg9; // 0x24  
+	        5'h0A   : reg_data_out <= slv_reg10;// 0x28      
+	        5'h0B   : reg_data_out <= slv_reg11;// 0x2C      
+	        5'h0C   : reg_data_out <= slv_reg12;// 0x30      
+	        5'h0D   : reg_data_out <= slv_reg13;// 0x34
+	        5'h0E   : reg_data_out <= slv_reg14;// 0x38
+	        5'h0F   : reg_data_out <= slv_reg15;// 0x3C
+	        5'h10   : reg_data_out <= slv_reg16;// 0x40
+	        5'h11   : reg_data_out <= slv_reg17;// 0x44
+	        5'h12   : reg_data_out <= slv_reg18;// 0x48
+	        5'h13   : reg_data_out <= slv_reg19;// 0x4C
+	        5'h14   : reg_data_out <= slv_reg20;// 0x50
+	        5'h15   : reg_data_out <= slv_reg21;// 0x54
+	        5'h16   : reg_data_out <= slv_reg22;// 0x58
+	        5'h17   : reg_data_out <= slv_reg23;// 0x5C
+	        5'h18   : reg_data_out <= slv_reg24;// 0x60
+	        5'h19   : reg_data_out <= slv_reg25;// 0x64
+	        5'h1A   : reg_data_out <= slv_reg26;// 0x68
+	        5'h1B   : reg_data_out <= slv_reg27;// 0x6C
+	        5'h1C   : reg_data_out <= slv_reg28;// 0x70
+	        5'h1D   : reg_data_out <= slv_reg29;// 0x74
+	        5'h1E   : reg_data_out <= slv_reg30;// 0x78
+	        5'h1F   : reg_data_out <= slv_reg31;// 0x7C
 	        default : reg_data_out <= 0;
 	      endcase
 	end
@@ -706,7 +711,8 @@
 	end    
 
 	// Add user logic here
-
+  assign led_div0_o = slv_reg6[4:0];
+  assign led_div1_o = slv_reg7[4:0];
 	// User logic ends
 
 	endmodule
