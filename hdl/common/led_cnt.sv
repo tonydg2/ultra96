@@ -4,12 +4,17 @@ module led_cnt (
   input         clk100,
   input   [4:0] div_i,
   input         wren_i,
-  output        led_o
+  output        led_o,
+  output        led_int_o
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+`ifdef SYNTHESIS
   localparam  [27:0]  CNT_1S = 28'h5F5E100;
-  
+`else
+  localparam  [27:0]  CNT_1S = 28'h5F5E100/100000; // sim
+`endif
+
   logic       [27:0]  cnt, cnt_max;
   logic               led;
 
@@ -33,6 +38,20 @@ module led_cnt (
   end
 
   assign led_o = led;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Interrupt
+
+  //logic [1:0] led_sr;
+  logic led_sr;
+
+  always_ff @(posedge clk100) begin 
+    if (rst)  led_sr  <= '0;
+    //else      led_sr  <= {led_sr[0],led};
+    else      led_sr  <= led;
+  end 
+
+  assign led_int_o = (led_sr == 1'b0 && led == 1'b1) ? '1 : '0;
 
 
 endmodule

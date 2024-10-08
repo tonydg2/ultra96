@@ -28,29 +28,31 @@ logic [4:0]   led_div_i;
 logic [31:0]  timestamp;
 logic [1:0]   led_sel;
 logic [15:0]  probe0;
+logic [2:0]   int_vec;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   top_bd_wrapper top_bd_wrapper_inst (
-    .M00_AXIL_araddr    (M00_AXIL_araddr  ),
-    .M00_AXIL_arprot    (M00_AXIL_arprot  ),
-    .M00_AXIL_arready   (M00_AXIL_arready ),
-    .M00_AXIL_arvalid   (M00_AXIL_arvalid ),
-    .M00_AXIL_awaddr    (M00_AXIL_awaddr  ),
-    .M00_AXIL_awprot    (M00_AXIL_awprot  ),
-    .M00_AXIL_awready   (M00_AXIL_awready ),
-    .M00_AXIL_awvalid   (M00_AXIL_awvalid ),
-    .M00_AXIL_bready    (M00_AXIL_bready  ),
-    .M00_AXIL_bresp     (M00_AXIL_bresp   ),
-    .M00_AXIL_bvalid    (M00_AXIL_bvalid  ),
-    .M00_AXIL_rdata     (M00_AXIL_rdata   ),
-    .M00_AXIL_rready    (M00_AXIL_rready  ),
-    .M00_AXIL_rresp     (M00_AXIL_rresp   ),
-    .M00_AXIL_rvalid    (M00_AXIL_rvalid  ),
-    .M00_AXIL_wdata     (M00_AXIL_wdata   ),
-    .M00_AXIL_wready    (M00_AXIL_wready  ),
-    .M00_AXIL_wstrb     (M00_AXIL_wstrb   ),
-    .M00_AXIL_wvalid    (M00_AXIL_wvalid  ),
+//    .M00_AXIL_araddr    (M00_AXIL_araddr  ),
+//    .M00_AXIL_arprot    (M00_AXIL_arprot  ),
+//    .M00_AXIL_arready   (M00_AXIL_arready ),
+//    .M00_AXIL_arvalid   (M00_AXIL_arvalid ),
+//    .M00_AXIL_awaddr    (M00_AXIL_awaddr  ),
+//    .M00_AXIL_awprot    (M00_AXIL_awprot  ),
+//    .M00_AXIL_awready   (M00_AXIL_awready ),
+//    .M00_AXIL_awvalid   (M00_AXIL_awvalid ),
+//    .M00_AXIL_bready    (M00_AXIL_bready  ),
+//    .M00_AXIL_bresp     (M00_AXIL_bresp   ),
+//    .M00_AXIL_bvalid    (M00_AXIL_bvalid  ),
+//    .M00_AXIL_rdata     (M00_AXIL_rdata   ),
+//    .M00_AXIL_rready    (M00_AXIL_rready  ),
+//    .M00_AXIL_rresp     (M00_AXIL_rresp   ),
+//    .M00_AXIL_rvalid    (M00_AXIL_rvalid  ),
+//    .M00_AXIL_wdata     (M00_AXIL_wdata   ),
+//    .M00_AXIL_wready    (M00_AXIL_wready  ),
+//    .M00_AXIL_wstrb     (M00_AXIL_wstrb   ),
+//    .M00_AXIL_wvalid    (M00_AXIL_wvalid  ),
+    .pl_int_vec         (int_vec          ),
     .git_hash           (git_hash         ),
     .timestamp          (timestamp        ),
     .dfx_active         (dfx_active       ),
@@ -69,6 +71,7 @@ logic [15:0]  probe0;
 //    .led_o  (RADIO_LED[1] ) //BLUE
 //  );
 
+/*
 dfx_axi_mgr dfx_axi_mgr_inst (
   .clk                    (clk100             ),    
   .resetn                 (rstn               ),  
@@ -152,23 +155,27 @@ dfx_axi_mgr dfx_axi_mgr_inst (
 		.S_AXI_RVALID   (m_axi_mgr_rvalid  ),
 		.S_AXI_RREADY   (m_axi_mgr_rready  )
 	);
+*/
 
   led_cnt_pr led_cnt_pr_inst (
-    .rst    (~rstn        ),
-    .clk100 (clk100       ),
-    .led_o  (RADIO_LED[1] ) //BLUE
+    .rst        (~rstn        ),
+    .clk100     (clk100       ),
+    .led_int_o  (int_vec[0]   ),
+    .led_o      (RADIO_LED[1] ) //BLUE
   );
 
   led_cnt2_pr led_cnt2_pr_inst (
-    .rst    (~rstn        ),
-    .clk100 (clk100       ),
-    .led_o  (led2         )//Yellow
+    .rst        (~rstn        ),
+    .clk100     (clk100       ),
+    .led_int_o  (int_vec[1]   ),
+    .led_o      (led2         )//Yellow
   );
 
   led_cnt3_pr led_cnt3_pr_inst (
-    .rst    (~rstn        ),
-    .clk100 (clk100       ),
-    .led_o  (led3         )
+    .rst        (~rstn        ),
+    .clk100     (clk100       ),
+    .led_int_o  (int_vec[2]   ),
+    .led_o      (led3         )
   );
 
   assign RADIO_LED[0] = (led_sel == 2'h0)? led3:
@@ -306,7 +313,7 @@ ila1 ila1_inst (
 
 endmodule
 //-------------------------------------------------------------------------------------------------
-
+/*
 // blackbox definition (only for DFX, otherwise remove)
 // do I actually need these...? test and verify...
 module led_cnt_pr (
@@ -361,3 +368,4 @@ module axil_reg32_2 #
 	output      S_AXI_RVALID,
 	input      S_AXI_RREADY);
 endmodule
+*/

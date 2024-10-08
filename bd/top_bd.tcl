@@ -229,13 +229,6 @@ proc create_root_design { parentCell } {
 
 
   # Create interface ports
-  set M00_AXIL [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 M00_AXIL ]
-  set_property -dict [ list \
-   CONFIG.ADDR_WIDTH {32} \
-   CONFIG.DATA_WIDTH {32} \
-   CONFIG.PROTOCOL {AXI4LITE} \
-   ] $M00_AXIL
-
 
   # Create ports
   set led_div_i [ create_bd_port -dir I -from 4 -to 0 led_div_i ]
@@ -244,11 +237,16 @@ proc create_root_design { parentCell } {
   set rstn [ create_bd_port -dir O -type rst rstn ]
   set clk100 [ create_bd_port -dir O -type clk clk100 ]
   set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {M00_AXIL} \
+   CONFIG.ASSOCIATED_BUSIF {} \
  ] $clk100
   set git_hash [ create_bd_port -dir O -from 63 -to 0 git_hash ]
   set timestamp [ create_bd_port -dir O -from 31 -to 0 timestamp ]
   set dfx_active [ create_bd_port -dir O dfx_active ]
+  set pl_int_vec [ create_bd_port -dir I -from 2 -to 0 -type intr pl_int_vec ]
+  set_property -dict [ list \
+   CONFIG.PortWidth {3} \
+   CONFIG.SENSITIVITY {EDGE_RISING} \
+ ] $pl_int_vec
 
   # Create instance: axil_reg32_0, and set properties
   set block_name axil_reg32
@@ -278,7 +276,7 @@ proc create_root_design { parentCell } {
   # Create instance: smartconnect_0, and set properties
   set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
   set_property -dict [list \
-    CONFIG.NUM_MI {2} \
+    CONFIG.NUM_MI {1} \
     CONFIG.NUM_SI {1} \
   ] $smartconnect_0
 
@@ -675,6 +673,8 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
     CONFIG.PSU__USB3_1__PERIPHERAL__IO {GT Lane3} \
     CONFIG.PSU__USB__RESET__MODE {Boot Pin} \
     CONFIG.PSU__USB__RESET__POLARITY {Active Low} \
+    CONFIG.PSU__USE__APU_LEGACY_INTERRUPT {0} \
+    CONFIG.PSU__USE__IRQ0 {1} \
     CONFIG.PSU__USE__M_AXI_GP0 {1} \
     CONFIG.PSU__USE__M_AXI_GP2 {0} \
   ] $zynq_ultra_ps_e_0
@@ -682,13 +682,13 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
 
   # Create interface connections
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axil_reg32_0/S_AXI] [get_bd_intf_pins smartconnect_0/M00_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_ports M00_AXIL] [get_bd_intf_pins smartconnect_0/M01_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD] [get_bd_intf_pins smartconnect_0/S00_AXI]
 
   # Create port connections
   connect_bd_net -net axil_reg32_0_dfx_active [get_bd_pins axil_reg32_0/dfx_active] [get_bd_ports dfx_active]
   connect_bd_net -net div_i_0_1 [get_bd_ports led_div_i] [get_bd_pins led_cnt_wrapper_0/div_i]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o]
+  connect_bd_net -net pl_int_vec_1 [get_bd_ports pl_int_vec] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins led_cnt_wrapper_0/rst]
@@ -699,7 +699,6 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments
-  assign_bd_address -offset 0xA0010000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs M00_AXIL/Reg] -force
   assign_bd_address -offset 0xA0000000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axil_reg32_0/S_AXI/reg0] -force
 
 
