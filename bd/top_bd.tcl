@@ -236,9 +236,6 @@ proc create_root_design { parentCell } {
   set led_wren_i [ create_bd_port -dir I led_wren_i ]
   set rstn [ create_bd_port -dir O -type rst rstn ]
   set clk100 [ create_bd_port -dir O -type clk clk100 ]
-  set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {} \
- ] $clk100
   set git_hash [ create_bd_port -dir O -from 63 -to 0 git_hash ]
   set timestamp [ create_bd_port -dir O -from 31 -to 0 timestamp ]
   set dfx_active [ create_bd_port -dir O dfx_active ]
@@ -545,6 +542,7 @@ MIO#SD 0#GPIO0 MIO#PMU GPI 0#DPAUX#DPAUX#DPAUX#DPAUX#GPIO1 MIO#PMU GPO 0#PMU GPO
     CONFIG.PSU__DP__LANE_SEL {Dual Lower} \
     CONFIG.PSU__DP__REF_CLK_FREQ {27} \
     CONFIG.PSU__DP__REF_CLK_SEL {Ref Clk2} \
+    CONFIG.PSU__EXPAND__GIC {1} \
     CONFIG.PSU__FPD_SLCR__WDT1__ACT_FREQMHZ {100.000000} \
     CONFIG.PSU__GPIO0_MIO__IO {MIO 0 .. 25} \
     CONFIG.PSU__GPIO0_MIO__PERIPHERAL__ENABLE {1} \
