@@ -3,7 +3,7 @@
 module led_cnt_wrapper (
   input         rst,
   input         clk100,
-  input   [4:0] div_i,
+  input   [11:0] div_i,
   input         wren_i,
   output        led_o
 );

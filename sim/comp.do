@@ -6,4 +6,4 @@ restart
 
 log -r *
 
-run 5us
+run 100us

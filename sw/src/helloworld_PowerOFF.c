@@ -25,30 +25,17 @@
 #include "xparameters.h"
 #include "helpFunctions.h"
 
-#define PL_REG32_ADDR  XPAR_AXIL_REG32_0_BASEADDR
-#define GPIO_MIO_ADDR   XPAR_GPIO_BASEADDR
-
-#define MIO_WR_0_25_OFFSET      0x40
-#define MIO_WR_26_51_OFFSET     0x44
-
-#define MIO_RD_0_25_OFFSET      0x60
-#define MIO_RD_26_51_OFFSET     0x64
-
-#define MIO_DIRM_0  0x204
-#define MIO_OEN_0   0x208
-
-#define MIO_DIRM_1  0x244
-#define MIO_OEN_1   0x248
-
-
-static void powerOff(void);
 
 int main()
 {
     init_platform();
 
     xil_printf("\n\rtesting adg2\n\r");
-
+#ifdef SDT 
+    xil_printf("\n\rSDT\n\r");
+#else 
+    xil_printf("\n\rNOT SDT\n\r");
+#endif
     versionCtrl0();
 
     //int val = 11;
@@ -79,33 +66,4 @@ int main()
     cleanup_platform();
     powerOff();
     return 0;
-}
-
-void powerOff(void) {
-    int shift, mask, val, pwrRD, pwrWR, pwrOFF;
-    
-    shift = 8;
-    mask = 0x1 << shift; // 1bits
-    val = 0x1 << shift; // set output and enable
-    pwrOFF = 0x0 << shift;
-    pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_DIRM_1);
-    xil_printf("pwrRD = %x\n\r",pwrRD);
-    pwrWR = (pwrRD & ~mask) | (val & mask);
-    xil_printf("pwrWR = %x\n\r",pwrWR);
-    Xil_Out32(GPIO_MIO_ADDR + MIO_DIRM_1,pwrWR);
-    //pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_DIRM_0);
-    //xil_printf("pwrRD = %x\n\r",pwrRD);
-
-    pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_OEN_1);
-    xil_printf("pwrRD = %x\n\r",pwrRD);
-    pwrWR = (pwrRD & ~mask) | (val & mask);
-    xil_printf("pwrWR = %x\n\r",pwrWR);
-    Xil_Out32(GPIO_MIO_ADDR + MIO_OEN_1,pwrWR);
-
-    pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_RD_26_51_OFFSET);
-    xil_printf("pwrRD = %d\n\r",val);
-    pwrWR = (pwrRD & ~mask) | (pwrOFF & mask);
-    Xil_Out32(GPIO_MIO_ADDR + MIO_WR_26_51_OFFSET,pwrWR);
-
-
 }

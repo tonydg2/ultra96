@@ -1,28 +1,38 @@
+//  0 = 1SEC
+//  8'h2B  ~1sec
+//  8'hFF ~0.17sec
 
 module led_cnt (
   input         rst,
   input         clk100,
-  input   [4:0] div_i,
+  input   [11:0] div_i,
   input         wren_i,
   output        led_o,
   output        led_int_o
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // @100MHz
+  localparam  [31:0]  SEC1  = 28'h5F5_E100;
+  localparam  [31:0]  SEC10 = 28'h3B9A_CA00;
+  localparam  [31:0]  SEC43 = 32'hFFFF_FFFF; // ~42.95 sec HALF PERIOD
 
 `ifdef SYNTHESIS
-  localparam  [27:0]  CNT_1S = 28'h5F5E100;
+  localparam  [31:0]  MAX_CNT = SEC43;
 `else
-  localparam  [27:0]  CNT_1S = 28'h5F5E100/100000; // sim
+  localparam  [31:0]  MAX_CNT = SEC43/100000; // sim
 `endif
 
-  logic       [27:0]  cnt, cnt_max;
+  logic       [31:0]  cnt, cnt_max;
   logic               led;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  assign cnt_max =  (div_i == 0)     ? CNT_1S :
-                    (div_i > 5'h14)  ? CNT_1S :
-                    (CNT_1S / div_i);
+//  assign cnt_max =  (div_i == 0)     ? MAX_CNT :
+//                    (div_i > 5'h14)  ? MAX_CNT :
+//                    (MAX_CNT / div_i);
+    
+    assign cnt_max =  (div_i == 0) ? SEC1 :     // 1sec exact if 0
+                      (MAX_CNT / div_i);        // max div ~43/255 =~ 0.17s
 
 
   always_ff @(posedge clk100) begin

@@ -26,9 +26,10 @@ logic         M00_AXIL_wvalid  ,s_axi_mgr_wvalid  ,m_axi_mgr_wvalid  ;
 logic [63:0]  git_hash;
 logic [4:0]   led_div_i;
 logic [31:0]  timestamp;
-logic [1:0]   led_sel;
+logic [3:0]   led_sel;
 logic [15:0]  probe0;
 logic [2:0]   int_vec;
+logic [11:0]  div1,div2,div3;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,15 +53,19 @@ logic [2:0]   int_vec;
 //    .M00_AXIL_wready    (M00_AXIL_wready  ),
 //    .M00_AXIL_wstrb     (M00_AXIL_wstrb   ),
 //    .M00_AXIL_wvalid    (M00_AXIL_wvalid  ),
-    .pl_int_vec         (int_vec          ),
-    .git_hash           (git_hash         ),
-    .timestamp          (timestamp        ),
-    .dfx_active         (dfx_active       ),
-    .clk100             (clk100           ),
-    .rstn               (rstn             ),
-    .led_div_i          ('0               ),
-    .led_o              (bd_led),//RADIO_LED[0]     ),//Yellow
-    .led_wren_i         ('0               )
+    .div1_o             (div1),
+    .div2_o             (div2),
+    .div3_o             (div3),
+    .wren1_o            (wren1),
+    .wren2_o            (wren2),
+    .wren3_o            (wren3),
+    .led_sel_o          (led_sel    ),
+    .pl_int_vec         (int_vec    ),
+    .git_hash           (git_hash   ),
+    .timestamp          (timestamp  ),
+    .clk100             (clk100     ),
+    .rstn               (rstn       ),
+    .led_o              (led_bd     )
   );
 
 //  led_cnt led_cnt_inst (
@@ -160,27 +165,42 @@ dfx_axi_mgr dfx_axi_mgr_inst (
   led_cnt_pr led_cnt_pr_inst (
     .rst        (~rstn        ),
     .clk100     (clk100       ),
+    .div_i      (div1         ),
+    .wren_i     (wren1        ),
     .led_int_o  (int_vec[0]   ),
-    .led_o      (RADIO_LED[1] ) //BLUE
+    .led_o      (led1         )
   );
 
   led_cnt2_pr led_cnt2_pr_inst (
     .rst        (~rstn        ),
     .clk100     (clk100       ),
+    .div_i      (div2         ),
+    .wren_i     (wren2        ),
     .led_int_o  (int_vec[1]   ),
-    .led_o      (led2         )//Yellow
+    .led_o      (led2         )
   );
 
   led_cnt3_pr led_cnt3_pr_inst (
     .rst        (~rstn        ),
     .clk100     (clk100       ),
+    .div_i      (div3         ),
+    .wren_i     (wren3        ),
     .led_int_o  (int_vec[2]   ),
     .led_o      (led3         )
   );
 
-  assign RADIO_LED[0] = (led_sel == 2'h0)? led3:
-                        (led_sel == 2'h1)? led2:
-                        bd_led;
+  //Yellow
+  assign RADIO_LED[0] = led_bd;
+  
+  //BLUE
+  assign RADIO_LED[1] = (led_sel == 4'h0)? led1:
+                        (led_sel == 4'h1)? led2:
+                        (led_sel == 4'h2)? led3:
+                        (led_sel == 4'h3)? 1'b0: // led off
+                        (led_sel == 4'h4)? 1'b1: // led on
+                        led_bd;
+
+
 
 //-------------------------------------------------------------------------------------------------
   //m_axi_mgr_rdata    ),    // input wire [31 : 0] m_axi_rdata

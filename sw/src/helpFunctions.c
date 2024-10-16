@@ -5,7 +5,13 @@
 #include <xil_io.h>
 #include "xparameters.h"
 
-#define PL_REG32_ADDR  XPAR_AXIL_REG32_0_BASEADDR
+#define PL_REG32_ADDR   XPAR_AXIL_REG32_0_BASEADDR
+#define GPIO_MIO_ADDR   XPAR_GPIO_BASEADDR
+
+#define MIO_WR_26_51_OFFSET     0x44
+#define MIO_RD_26_51_OFFSET     0x64
+#define MIO_DIRM_1              0x244
+#define MIO_OEN_1               0x248
 
 
 void versionCtrl0(void) {
@@ -28,5 +34,31 @@ void versionCtrl0(void) {
     xil_printf("  Git Hash: %x%x\n\r",gitM,gitL);
     xil_printf("  TIMESTAMP:%x = %d/%d/%d - %d:%d:%d\n\r",timeStamp,mon,day,yr,hr,min,sec);
     xil_printf("****************************************\n\r\n\r");
+
+}
+
+void powerOff(void) {
+    int shift, mask, val, pwrRD, pwrWR, pwrOFF;
+    
+    shift = 8;
+    mask = 0x1 << shift; // 1bits
+    val = 0x1 << shift; // set output and enable
+    pwrOFF = 0x0 << shift;
+    pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_DIRM_1);
+    //xil_printf("pwrRD = %x\n\r",pwrRD);
+    pwrWR = (pwrRD & ~mask) | (val & mask);
+    //xil_printf("pwrWR = %x\n\r",pwrWR);
+    Xil_Out32(GPIO_MIO_ADDR + MIO_DIRM_1,pwrWR);
+
+    pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_OEN_1);
+    //xil_printf("pwrRD = %x\n\r",pwrRD);
+    pwrWR = (pwrRD & ~mask) | (val & mask);
+    //xil_printf("pwrWR = %x\n\r",pwrWR);
+    Xil_Out32(GPIO_MIO_ADDR + MIO_OEN_1,pwrWR);
+
+    pwrRD = Xil_In32(GPIO_MIO_ADDR + MIO_RD_26_51_OFFSET);
+    //xil_printf("pwrRD = %d\n\r",val);
+    pwrWR = (pwrRD & ~mask) | (pwrOFF & mask);
+    Xil_Out32(GPIO_MIO_ADDR + MIO_WR_26_51_OFFSET,pwrWR);
 
 }

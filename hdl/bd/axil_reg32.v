@@ -15,9 +15,16 @@
 	)
 	(
 		// Users to add ports here
+
     input [63:0]  git_hash,
     input [31:0]  timestamp,
     output        dfx_active,
+    
+    output [31:0] div1_o,div2_o,div3_o,div4_o,
+    output        wren1_o,wren2_o,wren3_o,wren4_o,
+
+    output [3:0]  led_sel_o,
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -709,6 +716,47 @@
 
 	// Add user logic here
   assign dfx_active = slv_reg6[0];
-	// User logic ends
+	
+  reg wren1r,wren2r,wren3r,wren4r;
+  wire wren1,wren2,wren3,wren4;
+
+  assign div1_o = slv_reg7;  // 0x1C
+  assign div2_o = slv_reg8;  // 0x20
+  assign div3_o = slv_reg9;  // 0x24
+  assign div4_o = slv_reg10; // 0x28
+  
+  assign wren1 = ((slv_reg_wren == 1'b1) && (axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h07)) ? 1'b1 : 1'b0;
+  assign wren2 = ((slv_reg_wren == 1'b1) && (axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h08)) ? 1'b1 : 1'b0;
+  assign wren3 = ((slv_reg_wren == 1'b1) && (axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h09)) ? 1'b1 : 1'b0;
+  assign wren4 = ((slv_reg_wren == 1'b1) && (axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h0A)) ? 1'b1 : 1'b0;
+
+  reg wren1r,wren2r,wren3r,wren4r;
+
+	always @( posedge S_AXI_ACLK )
+	begin
+	  if ( S_AXI_ARESETN == 1'b0 )
+	    begin
+	      wren1r <= 0;
+        wren2r <= 0;
+        wren3r <= 0;
+        wren4r <= 0;
+	    end 
+	  else
+	    begin
+	      wren1r <= wren1;
+        wren2r <= wren2;
+        wren3r <= wren3;
+        wren4r <= wren4;
+	    end
+	end
+  
+  assign wren1_o = wren1r;
+  assign wren2_o = wren2r;
+  assign wren3_o = wren3r;
+  assign wren4_o = wren4r;
+
+  assign led_sel_o = slv_reg11[3:0]; // 0x2C
+
+  // User logic ends
 
 	endmodule

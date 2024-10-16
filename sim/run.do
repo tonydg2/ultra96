@@ -9,4 +9,4 @@ log -r /*
 
 if {[file exists wave.do]} {do wave.do}
 
-run 2us
+run 100us

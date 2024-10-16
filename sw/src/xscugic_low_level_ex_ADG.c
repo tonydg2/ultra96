@@ -64,6 +64,9 @@
 
 /************************** Constant Definitions *****************************/
 
+#define BD_REG32_ADDR XPAR_AXIL_REG32_0_BASEADDR
+
+
 /*
  * The following constants map to the XPAR parameters created in the
  * xparameters.h file. They are defined here such that a user can easily
@@ -129,8 +132,38 @@ int main(void)
 		xil_printf("Low Level GIC Example Test Failed\r\n");
 		return XST_FAILURE;
 	}
+    
+    
+    s8 Ch;
+    while (1) {
+      Ch = inbyte();
+      if (Ch == '\r') {
+          outbyte('\n');
+      }
+      outbyte(Ch);
+      xil_printf("\r\n");
 
-	xil_printf("Successfully ran Low Level GIC Example Test\r\n");
+      if (Ch == 'p') {
+        xil_printf("\r\n POWER OFF");
+        powerOff();
+        //break;
+      } else if (Ch == 'b') {break;
+      } else if (Ch == 'a') {
+        Xil_Out32(BD_REG32_ADDR + 0x1C, 0x001); // div1 43sec
+        Xil_Out32(BD_REG32_ADDR + 0x20, 0x700);// div2 
+        Xil_Out32(BD_REG32_ADDR + 0x24, 0x89B);// div3 0x89B ~51Hz?
+        Xil_Out32(BD_REG32_ADDR + 0x28, 0x0AC);// div4 yellow ~0.25sec
+      } else if (Ch == '0') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x0);
+      } else if (Ch == '1') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x1);
+      } else if (Ch == '2') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x2);
+      } else if (Ch == '3') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x3);
+      } else if (Ch == '4') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x4);
+      } else if (Ch == '5') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x5);
+      }
+    }
+
+	//xil_printf("Successfully ran Low Level GIC Example Test\r\n");
+    //powerOff();
 
 	return XST_SUCCESS;
 }
@@ -175,7 +208,10 @@ static int ScuGicLowLevelExample(u32 CpuBaseAddress, u32 DistBaseAddress)
 	//XScuGic_WriteReg(DistBaseAddress, XSCUGIC_ENABLE_SET_OFFSET, 0x0000FFFF); //PPIs 31:16,  SGIs 15:0, 
 
     // PL_PS_Group0 121:128
-    XScuGic_WriteReg(DistBaseAddress, XSCUGIC_ENABLE_SET_OFFSET + 0xC, 0xFE000000); // 127:121 = PL to PS ints 6:0
+    //XScuGic_WriteReg(DistBaseAddress, XSCUGIC_ENABLE_SET_OFFSET + 0xC, 0xFE000000); // IDs 127:121 = PL to PS ints 6:0
+    XScuGic_WriteReg(DistBaseAddress, XSCUGIC_ENABLE_SET_OFFSET + 0xC, 0x02000000); // ID 121 = PL to PS int 0
+
+
 
 	/*
 	 * Cause (simulate) an interrupt so the handler will be called.
@@ -255,7 +291,7 @@ void LowInterruptHandler(u32 CallbackRef)
 	u32 BaseAddress;
 	u32 IntID;
 
-    xil_printf("INTERRUPT HANDLER begin\r\n");
+    //xil_printf("INTERRUPT HANDLER begin\r\n");
 
 	BaseAddress = CallbackRef;
 
