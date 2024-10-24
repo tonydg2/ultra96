@@ -28,8 +28,9 @@ logic [4:0]   led_div_i;
 logic [31:0]  timestamp;
 logic [3:0]   led_sel;
 logic [15:0]  probe0;
-logic [2:0]   int_vec;
+logic [2:0]   int_vec, int_vec1;
 logic [11:0]  div1,div2,div3;
+logic [3:0]   fiq,irq;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,6 +54,13 @@ logic [11:0]  div1,div2,div3;
 //    .M00_AXIL_wready    (M00_AXIL_wready  ),
 //    .M00_AXIL_wstrb     (M00_AXIL_wstrb   ),
 //    .M00_AXIL_wvalid    (M00_AXIL_wvalid  ),
+
+    .fiq_en_o           (fiq_en_o),
+    .int_en_o           (int_en_o),
+    .led4_int_o         (led4_int),
+    .pl_ps_apugic_fiq   (fiq),
+    .pl_ps_apugic_irq   (irq),
+    .pl_ps_irq1         (int_vec1),
     .div1_o             (div1),
     .div2_o             (div2),
     .div3_o             (div3),
@@ -67,6 +75,10 @@ logic [11:0]  div1,div2,div3;
     .rstn               (rstn       ),
     .led_o              (led_bd     )
   );
+
+
+
+
 
 //  led_cnt led_cnt_inst (
 //    .rst    (~rstn        ),
@@ -200,7 +212,26 @@ dfx_axi_mgr dfx_axi_mgr_inst (
                         (led_sel == 4'h4)? 1'b1: // led on
                         led_bd;
 
+//led4_int
+assign led4_intn = ~led4_int;
 
+/* Active-Low
+assign fiq = 4'hF;
+assign irq[3:1] = 3'b111;
+assign irq[0] = (int_en_o == 1'b1)? led4_intn : 1'b1;
+// END Active-Low */
+
+// Active-HIGH
+assign fiq[3:1] = 3'b000;
+assign fiq[0] = (fiq_en_o == 1'b1)? led4_int : 1'b0;
+assign irq[3:1] = 3'b000;
+assign irq[0] = (int_en_o == 1'b1)? led4_int : 1'b0;
+// END Active-HIGH
+
+
+//assign fiq = (int_en_o == 1'b1)? {led4_intn,led4_intn,led4_intn,led4_intn}:{1'b1,1'b1,1'b1,1'b1}; // legacy interrupts "per CPU", so 4bit vector one for each 4 cores?
+//assign irq = (int_en_o == 1'b1)? {led4_intn,led4_intn,led4_intn,led4_intn}:{1'b1,1'b1,1'b1,1'b1}; // legacy interrupts "per CPU", so 4bit vector one for each 4 cores?
+assign int_vec1 = int_vec;
 
 //-------------------------------------------------------------------------------------------------
   //m_axi_mgr_rdata    ),    // input wire [31 : 0] m_axi_rdata

@@ -24,6 +24,8 @@
     output        wren1_o,wren2_o,wren3_o,wren4_o,
 
     output [3:0]  led_sel_o,
+    output        int_en_o,
+    output        fiq_en_o,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -755,7 +757,9 @@
   assign wren3_o = wren3r;
   assign wren4_o = wren4r;
 
-  assign led_sel_o = slv_reg11[3:0]; // 0x2C
+  assign led_sel_o  = slv_reg11[3:0]; // 0x2C
+  assign int_en_o   = slv_reg12[0]; // 0x30
+  assign fiq_en_o   = slv_reg13[0]; // 0x34
 
   // User logic ends
 

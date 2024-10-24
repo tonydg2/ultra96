@@ -54,7 +54,7 @@ module led_cnt (
 // Interrupts must be minimum 40ns wide for GIC to detect. This is probably for 'level' triggered
 //    experiment later, make wide now 
 
-  logic [10:0] led_sr;
+  logic [20:0] led_sr;
   //logic led_sr;
 
   always_ff @(posedge clk100) begin 

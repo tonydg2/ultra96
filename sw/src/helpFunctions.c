@@ -31,8 +31,9 @@ void versionCtrl0(void) {
     day = (timeStamp & (((1 << 5) - 1) << 27)) >> 27;
 
     xil_printf("\n\r************ PL VERSION ****************\n\r");
-    xil_printf("  Git Hash: %x%x\n\r",gitM,gitL);
-    xil_printf("  TIMESTAMP:%x = %d/%d/%d - %d:%d:%d\n\r",timeStamp,mon,day,yr,hr,min,sec);
+    xil_printf("  TIMESTAMP:%0x = %0d/%0d/%0d - %0d:%0d:%0d\n\r",timeStamp,mon,day,yr,hr,min,sec); // 0's mean zero padded on left (UG643)
+    xil_printf("  Git Hash: %0x%0x\n\r",gitM,gitL);
+    xil_printf("  %0x_%0x\n\r",timeStamp,gitM);
     xil_printf("****************************************\n\r\n\r");
 
 }
