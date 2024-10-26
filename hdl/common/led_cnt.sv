@@ -81,6 +81,9 @@ module led_cnt (
     else if (led_sr[0] == 1'b0 && led == 1'b1)  int_cnt <= int_cnt + 1;
   end
 
-  assign int_cnt_o = int_cnt;
+  // make this a generic/parameter selectable, and a generate so that the latch isn't needed if not being used, 
+  //  will probably be optimized out in synth
+  //assign int_cnt_o = int_cnt; 
+  assign int_cnt_o = led_int;
 
 endmodule

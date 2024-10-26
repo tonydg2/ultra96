@@ -255,16 +255,6 @@ proc create_root_design { parentCell } {
    CONFIG.PortWidth {3} \
    CONFIG.SENSITIVITY {EDGE_RISING} \
  ] $pl_ps_irq1
-  set pl_ps_apugic_irq [ create_bd_port -dir I -from 3 -to 0 -type intr pl_ps_apugic_irq ]
-  set_property -dict [ list \
-   CONFIG.PortWidth {4} \
-   CONFIG.SENSITIVITY {LEVEL_LOW} \
- ] $pl_ps_apugic_irq
-  set pl_ps_apugic_fiq [ create_bd_port -dir I -from 3 -to 0 -type intr pl_ps_apugic_fiq ]
-  set_property -dict [ list \
-   CONFIG.PortWidth {4} \
-   CONFIG.SENSITIVITY {LEVEL_LOW} \
- ] $pl_ps_apugic_fiq
   set led4_int_o [ create_bd_port -dir O led4_int_o ]
   set int_en_o [ create_bd_port -dir O int_en_o ]
   set fiq_en_o [ create_bd_port -dir O fiq_en_o ]
@@ -699,7 +689,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
     CONFIG.PSU__USB3_1__PERIPHERAL__IO {GT Lane3} \
     CONFIG.PSU__USB__RESET__MODE {Boot Pin} \
     CONFIG.PSU__USB__RESET__POLARITY {Active Low} \
-    CONFIG.PSU__USE__APU_LEGACY_INTERRUPT {1} \
+    CONFIG.PSU__USE__APU_LEGACY_INTERRUPT {0} \
     CONFIG.PSU__USE__IRQ0 {1} \
     CONFIG.PSU__USE__IRQ1 {1} \
     CONFIG.PSU__USE__M_AXI_GP0 {1} \
@@ -743,13 +733,11 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net axil_reg32_0_wren3_o [get_bd_pins axil_reg32_0/wren3_o] [get_bd_ports wren3_o]
   connect_bd_net -net axil_reg32_0_wren4_o [get_bd_pins axil_reg32_0/wren4_o] [get_bd_pins led_cnt_wrapper_0/wren_i]
   connect_bd_net -net const_1b0_dout [get_bd_pins const_1b0/dout] [get_bd_pins led_cnt_wrapper_0/int_clr_i]
-  connect_bd_net -net int_cnt_fiq_i_0_1 [get_bd_ports int_cnt_fiq_i] [get_bd_pins axil_reg32_0/int_cnt_fiq_i] [get_bd_pins ila_0/probe7]
-  connect_bd_net -net int_cnt_irq_i_0_1 [get_bd_ports int_cnt_irq_i] [get_bd_pins axil_reg32_0/int_cnt_irq_i] [get_bd_pins ila_0/probe6]
+  connect_bd_net -net int_cnt_fiq_i_0_1 [get_bd_ports int_cnt_fiq_i] [get_bd_pins ila_0/probe7] [get_bd_pins axil_reg32_0/int_cnt_fiq_i]
+  connect_bd_net -net int_cnt_irq_i_0_1 [get_bd_ports int_cnt_irq_i] [get_bd_pins ila_0/probe6] [get_bd_pins axil_reg32_0/int_cnt_irq_i]
   connect_bd_net -net led_cnt_wrapper_0_led_int_o [get_bd_pins led_cnt_wrapper_0/led_int_o] [get_bd_ports led4_int_o] [get_bd_pins ila_0/probe0]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o] [get_bd_pins ila_0/probe1]
   connect_bd_net -net pl_int_vec_1 [get_bd_ports pl_int_vec] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
-  connect_bd_net -net pl_ps_apugic_fiq_0_1 [get_bd_ports pl_ps_apugic_fiq] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_apugic_fiq] [get_bd_pins ila_0/probe3]
-  connect_bd_net -net pl_ps_apugic_irq_0_1 [get_bd_ports pl_ps_apugic_irq] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_apugic_irq] [get_bd_pins ila_0/probe2]
   connect_bd_net -net pl_ps_irq1_0_1 [get_bd_ports pl_ps_irq1] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq1]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]

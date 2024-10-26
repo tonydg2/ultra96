@@ -22,8 +22,8 @@ logic [3:0]   fiq,irq;
     .fiq_en_o           (fiq_en_o),
     .int_en_o           (int_en_o),
     .led4_int_o         (led4_int),
-    .pl_ps_apugic_fiq   (fiq),
-    .pl_ps_apugic_irq   (irq),
+//    .pl_ps_apugic_fiq   (fiq),
+//    .pl_ps_apugic_irq   (irq),
     .pl_ps_irq1         (int_vec1),
     .div1_o             (div1),
     .div2_o             (div2),
@@ -44,8 +44,8 @@ logic [3:0]   fiq,irq;
     .rst        (~rstn        ),
     .clk100     (clk100       ),
     .div_i      (div1         ),
-    .int_clr_i  (int_clr_fiq  ),
-    .int_cnt_o  (int_cnt_fiq  ),
+    .int_clr_i  ('0  ),
+    .int_cnt_o  (),
     .wren_i     (wren1        ),
     .led_int_o  (int_vec[0]   ),
     .led_o      (led1         )
@@ -56,8 +56,8 @@ logic [3:0]   fiq,irq;
     .clk100     (clk100       ),
     .div_i      (div2         ),
     .wren_i     (wren2        ),
-    .int_clr_i  (int_clr_irq  ),
-    .int_cnt_o  (int_cnt_irq  ),
+    .int_clr_i  ('0),
+    .int_cnt_o  (),
     .led_int_o  (int_vec[1]   ),
     .led_o      (led2         )
   );
@@ -67,8 +67,8 @@ logic [3:0]   fiq,irq;
     .clk100     (clk100       ),
     .div_i      (div3         ),
     .wren_i     (wren3        ),
-    .int_clr_i  (),
-    .int_cnt_o  ('0),
+    .int_clr_i  ('0),
+    .int_cnt_o  (),
     .led_int_o  (int_vec[2]   ),
     .led_o      (led3         )
   );
@@ -87,17 +87,13 @@ logic [3:0]   fiq,irq;
 //led4_int
 assign led4_intn = ~led4_int;
 
-/* Active-Low
-assign fiq = 4'hF;
-assign irq[3:1] = 3'b111;
-assign irq[0] = (int_en_o == 1'b1)? led4_intn : 1'b1;
-// END Active-Low */
 
+// FIQ/IRQ are Active-HIGH at the pins into the PS
 // Active-HIGH
-assign fiq[3:1] = 3'b000;
-assign fiq[0] = (fiq_en_o == 1'b1)? int_vec[0] : 1'b0; //led4_int
-assign irq[3:1] = 3'b000;
-assign irq[0] = (int_en_o == 1'b1)? int_vec[1] : 1'b0;
+//assign fiq[3:1] = 3'b000;
+//assign fiq[0] = (fiq_en_o == 1'b1)? int_vec[0] : 1'b0; //led4_int
+//assign irq[3:1] = 3'b000;
+//assign irq[0] = (int_en_o == 1'b1)? int_vec[1] : 1'b0;
 // END Active-HIGH
 
 
