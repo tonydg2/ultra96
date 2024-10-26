@@ -3,12 +3,14 @@
 //  8'hFF ~0.17sec
 
 module led_cnt (
-  input         rst,
-  input         clk100,
-  input   [11:0] div_i,
-  input         wren_i,
-  output        led_o,
-  output        led_int_o
+  input           rst,
+  input           clk100,
+  input   [11:0]  div_i,
+  input           wren_i,
+  input           int_clr_i,
+  output  [31:0]  int_cnt_o,
+  output          led_o,
+  output          led_int_o
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
   // @100MHz
@@ -22,9 +24,8 @@ module led_cnt (
   localparam  [31:0]  MAX_CNT = SEC43/100000; // sim
 `endif
 
-  logic       [31:0]  cnt, cnt_max;
-  logic               led;
-
+  logic       [31:0]  cnt, cnt_max, int_cnt;
+  logic               led, int_latch;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //  assign cnt_max =  (div_i == 0)     ? MAX_CNT :
@@ -63,9 +64,23 @@ module led_cnt (
     //else      led_sr  <= led;
   end 
 
-  assign led_int_o = ((led_sr[$bits(led_sr)-1] == 1'b0) && (|led_sr[$bits(led_sr)-2:0] || led == 1'b1)) ? '1 : '0;
+  assign led_int = ((led_sr[$bits(led_sr)-1] == 1'b0) && (|led_sr[$bits(led_sr)-2:0] || led == 1'b1)) ? '1 : '0;
   //assign led_int_o = ((led_sr[7] == 1'b0) && (|led_sr[6:0] || led == 1'b1)) ? '1 : '0;
   //assign led_int_o = (led_sr == 1'b0 && led == 1'b1) ? '1 : '0;
 
+
+  always_latch begin
+    if      (rst || int_clr_i)  int_latch <= '0;
+    else if (led_int)           int_latch <= 1'b1;
+  end
+
+  assign led_int_o = int_latch;
+
+  always_ff @(posedge clk100) begin 
+    if (rst || int_clr_i)                       int_cnt <= '0;
+    else if (led_sr[0] == 1'b0 && led == 1'b1)  int_cnt <= int_cnt + 1;
+  end
+
+  assign int_cnt_o = int_cnt;
 
 endmodule

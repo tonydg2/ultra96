@@ -27,6 +27,12 @@
     output        int_en_o,
     output        fiq_en_o,
 
+    input  [31:0] int_cnt_irq_i,
+    output        int_clr_irq_o,
+
+    input  [31:0] int_cnt_fiq_i,
+    output        int_clr_fiq_o,
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -675,8 +681,8 @@
 	        5'h0B   : reg_data_out <= slv_reg11;// 0x2C      
 	        5'h0C   : reg_data_out <= slv_reg12;// 0x30      
 	        5'h0D   : reg_data_out <= slv_reg13;// 0x34
-	        5'h0E   : reg_data_out <= slv_reg14;// 0x38
-	        5'h0F   : reg_data_out <= slv_reg15;// 0x3C
+	        5'h0E   : reg_data_out <= int_cnt_irq_i;  // 0x38
+	        5'h0F   : reg_data_out <= int_cnt_fiq_i;  // 0x3C
 	        5'h10   : reg_data_out <= slv_reg16;// 0x40
 	        5'h11   : reg_data_out <= slv_reg17;// 0x44
 	        5'h12   : reg_data_out <= slv_reg18;// 0x48
@@ -761,6 +767,19 @@
   assign int_en_o   = slv_reg12[0]; // 0x30
   assign fiq_en_o   = slv_reg13[0]; // 0x34
 
+  // read enables
+  assign int_clr_irq_o = ((slv_reg_rden == 1'b1) && (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h0E)) ? 1'b1 : 1'b0;  //int_cnt_irq_i;  // 0x38
+  assign int_clr_fiq_o = ((slv_reg_rden == 1'b1) && (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] == 5'h0F)) ? 1'b1 : 1'b0;  //int_cnt_fiq_i;  // 0x3C
+
   // User logic ends
 
 	endmodule
+
+
+
+
+
+
+
+
+

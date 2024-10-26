@@ -140,6 +140,7 @@ xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:zynq_ultra_ps_e:3.5\
 xilinx.com:ip:ila:6.2\
+xilinx.com:ip:xlconstant:1.1\
 "
 
    set list_ips_missing ""
@@ -267,6 +268,10 @@ proc create_root_design { parentCell } {
   set led4_int_o [ create_bd_port -dir O led4_int_o ]
   set int_en_o [ create_bd_port -dir O int_en_o ]
   set fiq_en_o [ create_bd_port -dir O fiq_en_o ]
+  set int_clr_irq_o [ create_bd_port -dir O int_clr_irq_o ]
+  set int_clr_fiq_o [ create_bd_port -dir O int_clr_fiq_o ]
+  set int_cnt_irq_i [ create_bd_port -dir I -from 31 -to 0 int_cnt_irq_i ]
+  set int_cnt_fiq_i [ create_bd_port -dir I -from 31 -to 0 int_cnt_fiq_i ]
 
   # Create instance: axil_reg32_0, and set properties
   set block_name axil_reg32
@@ -706,10 +711,17 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   set ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:ila:6.2 ila_0 ]
   set_property -dict [list \
     CONFIG.C_MONITOR_TYPE {Native} \
-    CONFIG.C_NUM_OF_PROBES {4} \
+    CONFIG.C_NUM_OF_PROBES {8} \
     CONFIG.C_PROBE2_WIDTH {4} \
     CONFIG.C_PROBE3_WIDTH {4} \
+    CONFIG.C_PROBE6_WIDTH {32} \
+    CONFIG.C_PROBE7_WIDTH {32} \
   ] $ila_0
+
+
+  # Create instance: const_1b0, and set properties
+  set const_1b0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 const_1b0 ]
+  set_property CONFIG.CONST_VAL {0} $const_1b0
 
 
   # Create interface connections
@@ -722,12 +734,17 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net axil_reg32_0_div3_o [get_bd_pins axil_reg32_0/div3_o] [get_bd_ports div3_o]
   connect_bd_net -net axil_reg32_0_div4_o [get_bd_pins axil_reg32_0/div4_o] [get_bd_pins led_cnt_wrapper_0/div_i]
   connect_bd_net -net axil_reg32_0_fiq_en_o [get_bd_pins axil_reg32_0/fiq_en_o] [get_bd_ports fiq_en_o]
+  connect_bd_net -net axil_reg32_0_int_clr_fiq_o [get_bd_pins axil_reg32_0/int_clr_fiq_o] [get_bd_ports int_clr_fiq_o] [get_bd_pins ila_0/probe5]
+  connect_bd_net -net axil_reg32_0_int_clr_irq_o [get_bd_pins axil_reg32_0/int_clr_irq_o] [get_bd_ports int_clr_irq_o] [get_bd_pins ila_0/probe4]
   connect_bd_net -net axil_reg32_0_int_en_o [get_bd_pins axil_reg32_0/int_en_o] [get_bd_ports int_en_o]
   connect_bd_net -net axil_reg32_0_led_sel_o [get_bd_pins axil_reg32_0/led_sel_o] [get_bd_ports led_sel_o]
   connect_bd_net -net axil_reg32_0_wren1_o [get_bd_pins axil_reg32_0/wren1_o] [get_bd_ports wren1_o]
   connect_bd_net -net axil_reg32_0_wren2_o [get_bd_pins axil_reg32_0/wren2_o] [get_bd_ports wren2_o]
   connect_bd_net -net axil_reg32_0_wren3_o [get_bd_pins axil_reg32_0/wren3_o] [get_bd_ports wren3_o]
   connect_bd_net -net axil_reg32_0_wren4_o [get_bd_pins axil_reg32_0/wren4_o] [get_bd_pins led_cnt_wrapper_0/wren_i]
+  connect_bd_net -net const_1b0_dout [get_bd_pins const_1b0/dout] [get_bd_pins led_cnt_wrapper_0/int_clr_i]
+  connect_bd_net -net int_cnt_fiq_i_0_1 [get_bd_ports int_cnt_fiq_i] [get_bd_pins axil_reg32_0/int_cnt_fiq_i] [get_bd_pins ila_0/probe7]
+  connect_bd_net -net int_cnt_irq_i_0_1 [get_bd_ports int_cnt_irq_i] [get_bd_pins axil_reg32_0/int_cnt_irq_i] [get_bd_pins ila_0/probe6]
   connect_bd_net -net led_cnt_wrapper_0_led_int_o [get_bd_pins led_cnt_wrapper_0/led_int_o] [get_bd_ports led4_int_o] [get_bd_pins ila_0/probe0]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o] [get_bd_pins ila_0/probe1]
   connect_bd_net -net pl_int_vec_1 [get_bd_ports pl_int_vec] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
@@ -739,7 +756,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins led_cnt_wrapper_0/rst]
   connect_bd_net -net user_init_64b_wrappe_0_usr_access_data_o [get_bd_pins user_init_64b_wrappe_0/usr_access_data_o] [get_bd_ports timestamp] [get_bd_pins axil_reg32_0/timestamp]
   connect_bd_net -net user_init_64b_wrappe_0_value_o [get_bd_pins user_init_64b_wrappe_0/value_o] [get_bd_ports git_hash] [get_bd_pins axil_reg32_0/git_hash]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins ila_0/clk] [get_bd_pins led_cnt_wrapper_0/clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins ila_0/clk] [get_bd_pins axil_reg32_0/S_AXI_ACLK] [get_bd_pins led_cnt_wrapper_0/clk100]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments
