@@ -28,7 +28,8 @@
 
 
 #define BD_REG32_ADDR   XPAR_AXIL_REG32_0_BASEADDR
-#define BD_REG32_2_ADDR 0xa0010000
+//#define BD_REG32_2_ADDR 0xa0010000
+#define BD_REG32_2_ADDR 0xa0001000
 
 int main()
 {
