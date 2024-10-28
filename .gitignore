@@ -12,3 +12,7 @@ RM_products*
 **/logs/
 **/workspace*/
 sw/work*
+
+/sim/*
+!/sim/*.do 
+!/sim/*.tcl 

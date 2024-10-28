@@ -229,15 +229,30 @@ proc create_root_design { parentCell } {
 
 
   # Create interface ports
+  set AXIL_M0 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 AXIL_M0 ]
+  set_property -dict [ list \
+   CONFIG.ADDR_WIDTH {32} \
+   CONFIG.DATA_WIDTH {32} \
+   CONFIG.HAS_BURST {0} \
+   CONFIG.HAS_CACHE {0} \
+   CONFIG.HAS_LOCK {0} \
+   CONFIG.HAS_QOS {0} \
+   CONFIG.HAS_REGION {0} \
+   CONFIG.NUM_READ_OUTSTANDING {1} \
+   CONFIG.NUM_WRITE_OUTSTANDING {1} \
+   CONFIG.PROTOCOL {AXI4LITE} \
+   ] $AXIL_M0
+
 
   # Create ports
   set led_o [ create_bd_port -dir O led_o ]
   set clk100 [ create_bd_port -dir O -type clk clk100 ]
   set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {} \
+   CONFIG.ASSOCIATED_BUSIF {AXIL_M0} \
  ] $clk100
   set rstn [ create_bd_port -dir O -type rst rstn ]
   set led_div1_o [ create_bd_port -dir O -from 4 -to 0 led_div1_o ]
+  set peripheral_rstn [ create_bd_port -dir O -from 0 -to 0 -type rst peripheral_rstn ]
 
   # Create instance: axil_reg32_0, and set properties
   set block_name axil_reg32
@@ -664,13 +679,14 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   # Create instance: smartconnect_0, and set properties
   set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
   set_property -dict [list \
-    CONFIG.NUM_MI {1} \
+    CONFIG.NUM_MI {2} \
     CONFIG.NUM_SI {1} \
   ] $smartconnect_0
 
 
   # Create interface connections
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axil_reg32_0/S_AXI] [get_bd_intf_pins smartconnect_0/M00_AXI]
+  connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_ports AXIL_M0] [get_bd_intf_pins smartconnect_0/M01_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD] [get_bd_intf_pins smartconnect_0/S00_AXI]
 
   # Create port connections
@@ -678,14 +694,15 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net axil_reg32_0_led_div1_o [get_bd_pins axil_reg32_0/led_div1_o] [get_bd_ports led_div1_o]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_ports peripheral_rstn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins led_cnt_wrapper_0/rst]
   connect_bd_net -net user_init_64b_wrappe_0_usr_access_data_o [get_bd_pins user_init_64b_wrappe_0/usr_access_data_o] [get_bd_pins axil_reg32_0/timestamp]
   connect_bd_net -net user_init_64b_wrappe_0_value_o [get_bd_pins user_init_64b_wrappe_0/value_o] [get_bd_pins axil_reg32_0/git_hash]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK] [get_bd_pins led_cnt_wrapper_0/clk100]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins led_cnt_wrapper_0/clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments
+  assign_bd_address -offset 0xA0010000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs AXIL_M0/Reg] -force
   assign_bd_address -offset 0xA0000000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axil_reg32_0/S_AXI/reg0] -force
 
 
