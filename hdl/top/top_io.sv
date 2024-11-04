@@ -98,10 +98,10 @@ module top_io (
   );
 
 
-  ila1 ila1_inst (
-  	.clk(clk100), // input wire clk
-  	.probe0(div0), // input wire [4:0]  probe0  
-  	.probe1(div1) // input wire [4:0]  probe1
-  );
+//  ila1 ila1_inst (
+//  	.clk(clk100), // input wire clk
+//  	.probe0(div0), // input wire [4:0]  probe0  
+//  	.probe1(div1) // input wire [4:0]  probe1
+//  );
 
 endmodule

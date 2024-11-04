@@ -46,7 +46,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# axil_reg32, led_cnt_wrapper, user_init_64b_wrapper_zynq
+# axil_reg32, led_cnt_wrapper, user_init_64b_wrapper_zynq, axil_passthru
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -167,6 +167,7 @@ if { $bCheckModules == 1 } {
 axil_reg32\
 led_cnt_wrapper\
 user_init_64b_wrapper_zynq\
+axil_passthru\
 "
 
    set list_mods_missing ""
@@ -679,9 +680,21 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   ] $smartconnect_0
 
 
+  # Create instance: axil_passthru_0, and set properties
+  set block_name axil_passthru
+  set block_cell_name axil_passthru_0
+  if { [catch {set axil_passthru_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $axil_passthru_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
   # Create interface connections
+  connect_bd_intf_net -intf_net axil_passthru_0_M_AXI [get_bd_intf_ports AXIL_M0] [get_bd_intf_pins axil_passthru_0/M_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axil_reg32_0/S_AXI] [get_bd_intf_pins smartconnect_0/M00_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_ports AXIL_M0] [get_bd_intf_pins smartconnect_0/M01_AXI]
+  connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins smartconnect_0/M01_AXI] [get_bd_intf_pins axil_passthru_0/S_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD] [get_bd_intf_pins smartconnect_0/S00_AXI]
 
   # Create port connections
@@ -697,8 +710,11 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments
-  assign_bd_address -offset 0xA0010000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs AXIL_M0/Reg] -force
+  assign_bd_address -offset 0xA0001000 -range 0x00001000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axil_passthru_0/S_AXI/reg0] -force
   assign_bd_address -offset 0xA0000000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axil_reg32_0/S_AXI/reg0] -force
+
+  # Exclude Address Segments
+  exclude_bd_addr_seg -offset 0x00000000 -range 0x00000080 -target_address_space [get_bd_addr_spaces axil_passthru_0/M_AXI] [get_bd_addr_segs AXIL_M0/Reg]
 
 
   # Restore current instance
