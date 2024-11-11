@@ -21,8 +21,6 @@ module top_io (
 
   top_bd_wrapper top_bd_wrapper_inst (
     .clk100       (clk100       ),
-    .clk_6p25     (clk_6p25     ),
-    .clk_10       (clk_10       ),
     .rstn         (rstn         ),
     .UART_0_rxd   (rx0          ), // IN
     .UART_0_txd   (tx0          ), // OUT
@@ -32,6 +30,15 @@ module top_io (
     .led_o        (RADIO_LED[0] )//Yellow
   );
 
+  led_cnt led_cnt_inst (
+    .rst      (~rstn        ),
+    .clk100   (clk100       ),
+    .div_i    (5'h14        ),//led_div1
+    .wren_i   ('0           ),
+    .led_o    (RADIO_LED[1] ) //BLUE
+  );
+
+/*
   BUFGCE_DIV #(
     .BUFGCE_DIVIDE(8),              // 1-8
     // Programmable Inversion Attributes: Specifies built-in programmable inversion on specific pins
@@ -44,14 +51,6 @@ module top_io (
     .CE('1),        // 1-bit input: Buffer enable
     .CLR('0),       // 1-bit input: Asynchronous clear
     .I(clk_6p25)    // 1-bit input: Buffer
-  );
-
-  led_cnt led_cnt_inst (
-    .rst      (~rstn        ),
-    .clk100   (clk_p78125   ),
-    .div_i    (5'h3         ),//led_div1
-    .wren_i   ('0           ),
-    .led_o    (RADIO_LED[1] ) //BLUE
   );
 
   ila1 ila1_inst (
@@ -69,7 +68,7 @@ module top_io (
   	.probe2(rx1),       // input wire [0:0]  probe1
   	.probe3(tx1)       // input wire [0:0]  probe1
   );
-
+*/
 
 endmodule
 
