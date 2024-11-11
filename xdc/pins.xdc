@@ -1,5 +1,14 @@
 #--------------------------------------------------------------------------------------------------
 
+# click mezz slot1
+set_property PACKAGE_PIN F8 [get_ports {UART0_TX_O}];#  HD_GPIO_2 pin7
+set_property PACKAGE_PIN F7 [get_ports {UART0_RX_I}];#  HD_GPIO_1 pin5
+
+# click mezz slot2
+set_property PACKAGE_PIN G5 [get_ports {UART1_RX_I}];#  HD_GPIO_4
+set_property PACKAGE_PIN F6 [get_ports {UART1_TX_O}];#  HD_GPIO_5
+
+
 #--------------------------------------------------------------------------------------------------
 #set_property BITSTREAM.CONFIG.USR_ACCESS TIMESTAMP [current_design]
 
