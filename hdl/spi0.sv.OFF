@@ -1,0 +1,182 @@
+// SPI SINK, responder to SPI SOURCE
+// emulate SPI responses for MCP23S17 device
+// 
+// byte0 = OPCODE + R/W  (Write = 0, Read = 1)
+// byte1 = reg addr
+// byte1+= data
+//
+
+`timescale 1ns / 1ps  // <time_unit>/<time_precision>
+
+module spi (
+    input   rst,
+    input   clk,
+    input   sclk_i,
+    input   csn_i,
+    input   mosi_i,
+    output  miso_o
+);
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// CDC
+  logic sclk_sync,csn_sync,mosi_sync
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //logic [2:0] bit_idx;
+  logic [7:0] opcode,addr,data_rcv,data_snd,data_snd2;
+  logic dout,sclk_re,sclk_sr, opcode_done, addr_done;
+  integer bit_idx=7;
+
+  assign csn = csn_i;
+  assign din = mosi_i;
+  assign miso_o = dout;
+
+  assign data_snd   = 8'h76;
+  assign data_snd2  = 8'h23;
+
+  typedef enum {
+    IDLE,GET_OPCODE,GET_ADDR,GET_DATA,SEND_DATA,SEND_DATA2,WAIT
+  } spi_sm_type;
+
+  spi_sm_type SPI_SM;
+
+  always_ff @(posedge clk) begin 
+    if (rst)  sclk_sr <= '0;
+    else      sclk_sr <= {sclk_sr,sclk_i};//shift reg for edge detect
+  end 
+  
+  assign sclk_re = ((sclk_sr == 1'b0) && (sclk_i == 1'b1)) ? 1'b1 : 1'b0; // rising edge strobe
+
+  always_ff @(posedge clk) begin 
+    if (rst) begin 
+      bit_idx     <= 7;
+      SPI_SM      <= IDLE;
+      opcode      <= '0;
+      addr        <= '0;
+      data_rcv    <= '0;
+      dout        <= '0;
+      opcode_done <= '0;
+      addr_done   <= '0;
+    end else begin 
+      if (csn) SPI_SM <= IDLE;
+      else if (sclk_re) begin 
+        case (SPI_SM) 
+
+          IDLE: begin //0
+            opcode_done <= '0;
+            addr_done   <= '0;
+            bit_idx     <= 7;
+            if (~csn) begin 
+              opcode[7] <= din; // 1st bit
+              bit_idx   <= bit_idx - 1;
+              SPI_SM    <= GET_OPCODE; 
+            end
+          end
+
+          GET_OPCODE: begin //1
+            if (bit_idx == 0) begin
+              opcode[0]   <= din;  //last bit
+              bit_idx     <= 7;
+              opcode_done <= '1;
+              SPI_SM      <= GET_ADDR; 
+            end else begin
+              opcode[bit_idx] <= din;
+              bit_idx         <= bit_idx - 1;
+            end 
+          end
+
+          GET_ADDR: begin //2
+            if (bit_idx == 0) begin
+              addr[0]   <= din;  //last bit
+              bit_idx   <= 7;
+              addr_done <= '1;
+              if (opcode[0] == 1'b0)  SPI_SM  <= GET_DATA;  // write command from SRC, this module will receive data
+              else                    SPI_SM  <= SEND_DATA; // read command from SRC, this module will send data to SRC
+            end else begin
+              addr[bit_idx] <= din; 
+              bit_idx       <= bit_idx - 1;
+            end 
+          end
+
+          GET_DATA: begin //3
+            if (bit_idx == 0) begin
+              data_rcv[0] <= din;  //last bit
+              bit_idx     <= 7;
+              SPI_SM      <= WAIT;
+            end else begin
+              data_rcv[bit_idx] <= din; 
+              bit_idx           <= bit_idx - 1;
+            end 
+          end 
+
+          SEND_DATA: begin //4
+            if (bit_idx == 0) begin
+              dout <= data_snd[0];  //last bit
+              bit_idx     <= 7;
+              SPI_SM      <= SEND_DATA2;
+            end else begin
+              dout  <= data_snd[bit_idx];
+              bit_idx <= bit_idx - 1;
+            end 
+          end 
+
+          SEND_DATA2: begin //5
+            if (bit_idx == 0) begin
+              dout <= data_snd2[0];  //last bit
+              bit_idx     <= 7;
+              SPI_SM      <= WAIT;
+            end else begin
+              dout  <= data_snd[bit_idx];
+              bit_idx <= bit_idx - 1;
+            end 
+          end 
+
+          WAIT: if (csn)  SPI_SM <= IDLE; //6
+        endcase
+      end
+    end 
+  end 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// hw debug only, disable for simulation(questa)
+//`ifndef SIMULATION // requires passing in param at compile time (vlog spi.sv +define+SIMULATION)
+`ifndef QUESTA
+`ifndef MODELSIM
+
+  logic [2:0] sm,idx;
+
+  assign sm = (SPI_SM == IDLE         ) ? 'h0 :
+              (SPI_SM == GET_OPCODE   ) ? 'h1 :
+              (SPI_SM == GET_ADDR     ) ? 'h2 :
+              (SPI_SM == GET_DATA     ) ? 'h3 :
+              (SPI_SM == SEND_DATA    ) ? 'h4 :
+              (SPI_SM == SEND_DATA2   ) ? 'h5 :
+              (SPI_SM == WAIT         ) ? 'h6 : 'h7;
+
+  assign idx = bit_idx;
+
+  ila2 ila2 (
+  	.clk(clk),   // input wire clk
+  	.probe0(sm),
+  	.probe1(csn),
+  	.probe2(din),
+  	.probe3(dout),
+  	.probe4(idx),
+  	.probe5(sclk_re),
+  	.probe6(opcode),
+  	.probe7(addr),
+  	.probe8(data_rcv),
+  	.probe9(opcode_done),
+  	.probe10(addr_done),
+    .probe11(sclk_i)
+  );
+
+`endif
+`endif
+
+
+endmodule
+
+

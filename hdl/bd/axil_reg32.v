@@ -21,6 +21,11 @@
     output [4:0] led_div0_o,
     output [4:0] led_div1_o,
 
+    output [31:0] debug28,
+    output [31:0] debug29,
+    output [31:0] debug30,
+    output [31:0] debug31,
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -713,6 +718,12 @@
 	// Add user logic here
   assign led_div0_o = slv_reg6[4:0];
   assign led_div1_o = slv_reg7[4:0];
+
+  assign debug28 = slv_reg28;
+  assign debug29 = slv_reg29;
+  assign debug30 = slv_reg30;
+  assign debug31 = slv_reg31;
+
 	// User logic ends
 
 	endmodule

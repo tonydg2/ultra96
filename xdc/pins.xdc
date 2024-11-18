@@ -4,9 +4,18 @@
 set_property PACKAGE_PIN F8 [get_ports {UART0_TX_O}];#  HD_GPIO_2 pin7
 set_property PACKAGE_PIN F7 [get_ports {UART0_RX_I}];#  HD_GPIO_1 pin5
 
+#set_property PACKAGE_PIN A7 [get_ports {RST1_O}];#  HD_GPIO_7
+#set_property PACKAGE_PIN A6 [get_ports {PWM1_O}];#  HD_GPIO_6
+#set_property PACKAGE_PIN G6 [get_ports {INT1_O}];#  HD_GPIO_8
+
+
 # click mezz slot2
 set_property PACKAGE_PIN G5 [get_ports {UART1_RX_I}];#  HD_GPIO_4
 set_property PACKAGE_PIN F6 [get_ports {UART1_TX_O}];#  HD_GPIO_5
+
+#set_property PACKAGE_PIN B6 [get_ports {RST2_O}];#  HD_GPIO_14
+#set_property PACKAGE_PIN C7 [get_ports {PWM2_O}];#  HD_GPIO_13
+#set_property PACKAGE_PIN C5 [get_ports {INT2_O}];#  HD_GPIO_15
 
 
 #--------------------------------------------------------------------------------------------------
