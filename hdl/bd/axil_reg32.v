@@ -24,6 +24,12 @@
     input [63:0]  git_hash_bd,
     input [31:0]  timestamp_bd,
 
+    input [63:0]  git_hash_lcd,
+    input [31:0]  timestamp_lcd,
+
+    input [63:0]  git_hash_uart,
+    input [31:0]  timestamp_uart,
+
     output [4:0] led_div0_o,
     output [4:0] led_div1_o,
 
@@ -670,12 +676,12 @@
 	        5'h06   : reg_data_out <= git_hash_bd[31: 0];       // 0x18
 	        5'h07   : reg_data_out <= git_hash_bd[63:32];       // 0x1C
 	        5'h08   : reg_data_out <= timestamp_bd;             // 0x20
-	        5'h09   : reg_data_out <= slv_reg9; // 0x24
-	        5'h0A   : reg_data_out <= slv_reg10;// 0x28
-	        5'h0B   : reg_data_out <= slv_reg11;// 0x2C
-	        5'h0C   : reg_data_out <= slv_reg12;// 0x30
-	        5'h0D   : reg_data_out <= slv_reg13;// 0x34
-	        5'h0E   : reg_data_out <= slv_reg14;// 0x38
+	        5'h09   : reg_data_out <= git_hash_lcd[31: 0];  // 0x24
+	        5'h0A   : reg_data_out <= git_hash_lcd[63:32];  // 0x28
+	        5'h0B   : reg_data_out <= timestamp_lcd;        // 0x2C
+	        5'h0C   : reg_data_out <= git_hash_uart[31: 0]; // 0x30
+	        5'h0D   : reg_data_out <= git_hash_uart[63:32]; // 0x34
+	        5'h0E   : reg_data_out <= timestamp_uart;       // 0x38
 	        5'h0F   : reg_data_out <= slv_reg15;// 0x3C
 	        5'h10   : reg_data_out <= slv_reg16;// 0x40
 	        5'h11   : reg_data_out <= slv_reg17;// 0x44

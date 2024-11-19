@@ -4,8 +4,8 @@ module top_io (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   logic [4:0]   led_div1;
-  logic [63:0]  git_hash_scripts,git_hash_top;
-  logic [31:0]  timestamp_scripts,time_stamp_top;
+  logic [63:0]  git_hash_scripts,git_hash_top,git_hash_click_uart,git_hash_click_lcd;
+  logic [31:0]  timestamp_scripts,time_stamp_top,time_stamp_click_uart,time_stamp_click_lcd;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,8 +14,12 @@ module top_io (
     .rstn                 (rstn             ),
     .git_hash_scripts_0   (git_hash_scripts ),
     .git_hash_top_0       (git_hash_top     ),
+    .git_hash_lcd_0       (git_hash_click_lcd     ),
+    .git_hash_uart_0      (git_hash_click_uart    ),
     .timestamp_scripts_0  (timestamp_scripts),
     .timestamp_top_0      (time_stamp_top   ),
+    .timestamp_lcd_0      (time_stamp_click_lcd   ),
+    .timestamp_uart_0     (time_stamp_click_uart  ),
     .led_div1_o           (led_div1         ),
     .led_o                (RADIO_LED[0]     )//Yellow
   );
@@ -28,6 +32,7 @@ module top_io (
     .led_o    (RADIO_LED[1] ) //BLUE
   );
 
+// SCRIPTS
   user_init_64b git_hash_scripts_inst (
     .clk      (1'b0),
     .value_o  (git_hash_scripts)
@@ -38,6 +43,7 @@ module top_io (
     .value_o  (timestamp_scripts)
   );
 
+// TOP
   user_init_64b git_hash_top_inst (
     .clk      (1'b0),
     .value_o  (git_hash_top)
@@ -48,6 +54,7 @@ module top_io (
     .value_o  (time_stamp_top)
   );
 
+// UART
   user_init_64b version_click_uart_inst (
     .clk      (1'b0),
     .value_o  (git_hash_click_uart)
@@ -56,6 +63,17 @@ module top_io (
   user_init_32b time_stamp_click_uart_inst (
     .clk      (1'b0),
     .value_o  (time_stamp_click_uart)
+  );
+
+// LCD
+  user_init_64b version_click_lcd_inst (
+    .clk      (1'b0),
+    .value_o  (git_hash_click_lcd)
+  );
+
+  user_init_32b time_stamp_click_lcd_inst (
+    .clk      (1'b0),
+    .value_o  (time_stamp_click_lcd)
   );
 
 
