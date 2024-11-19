@@ -4,3 +4,6 @@
 [submodule "sub/click_uart"]
 	path = sub/click_uart
 	url = https://github.com/tdg2-org/click_uart.git
+[submodule "sub/click_lcd"]
+	path = sub/click_lcd
+	url = https://github.com/tdg2-org/click_lcd.git

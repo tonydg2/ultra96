@@ -48,5 +48,15 @@ module top_io (
     .value_o  (time_stamp_top)
   );
 
+  user_init_64b version_click_uart_inst (
+    .clk      (1'b0),
+    .value_o  (git_hash_click_uart)
+  );
+
+  user_init_32b time_stamp_click_uart_inst (
+    .clk      (1'b0),
+    .value_o  (time_stamp_click_uart)
+  );
+
 
 endmodule
