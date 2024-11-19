@@ -233,11 +233,12 @@ proc create_root_design { parentCell } {
   # Create ports
   set led_o [ create_bd_port -dir O led_o ]
   set clk100 [ create_bd_port -dir O -type clk clk100 ]
-  set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {} \
- ] $clk100
   set rstn [ create_bd_port -dir O -type rst rstn ]
   set led_div1_o [ create_bd_port -dir O -from 4 -to 0 led_div1_o ]
+  set git_hash_scripts_0 [ create_bd_port -dir I -from 63 -to 0 git_hash_scripts_0 ]
+  set git_hash_top_0 [ create_bd_port -dir I -from 63 -to 0 git_hash_top_0 ]
+  set timestamp_scripts_0 [ create_bd_port -dir I -from 31 -to 0 timestamp_scripts_0 ]
+  set timestamp_top_0 [ create_bd_port -dir I -from 31 -to 0 timestamp_top_0 ]
 
   # Create instance: axil_reg32_0, and set properties
   set block_name axil_reg32
@@ -264,13 +265,13 @@ proc create_root_design { parentCell } {
   # Create instance: proc_sys_reset_0, and set properties
   set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0 ]
 
-  # Create instance: user_init_64b_wrappe_0, and set properties
+  # Create instance: version_bd, and set properties
   set block_name user_init_64b_wrapper_zynq
-  set block_cell_name user_init_64b_wrappe_0
-  if { [catch {set user_init_64b_wrappe_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+  set block_cell_name version_bd
+  if { [catch {set version_bd [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
      catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
-   } elseif { $user_init_64b_wrappe_0 eq "" } {
+   } elseif { $version_bd eq "" } {
      catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
@@ -676,13 +677,17 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   # Create port connections
   connect_bd_net -net axil_reg32_0_led_div0_o [get_bd_pins axil_reg32_0/led_div0_o] [get_bd_pins led_cnt_wrapper_0/div_i]
   connect_bd_net -net axil_reg32_0_led_div1_o [get_bd_pins axil_reg32_0/led_div1_o] [get_bd_ports led_div1_o]
+  connect_bd_net -net git_hash_scripts_0_1 [get_bd_ports git_hash_scripts_0] [get_bd_pins axil_reg32_0/git_hash_scripts]
+  connect_bd_net -net git_hash_top_0_1 [get_bd_ports git_hash_top_0] [get_bd_pins axil_reg32_0/git_hash_top]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins led_cnt_wrapper_0/rst]
-  connect_bd_net -net user_init_64b_wrappe_0_usr_access_data_o [get_bd_pins user_init_64b_wrappe_0/usr_access_data_o] [get_bd_pins axil_reg32_0/timestamp]
-  connect_bd_net -net user_init_64b_wrappe_0_value_o [get_bd_pins user_init_64b_wrappe_0/value_o] [get_bd_pins axil_reg32_0/git_hash]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK] [get_bd_pins led_cnt_wrapper_0/clk100]
+  connect_bd_net -net timestamp_scripts_0_1 [get_bd_ports timestamp_scripts_0] [get_bd_pins axil_reg32_0/timestamp_scripts]
+  connect_bd_net -net timestamp_top_0_1 [get_bd_ports timestamp_top_0] [get_bd_pins axil_reg32_0/timestamp_top]
+  connect_bd_net -net user_init_64b_wrappe_0_usr_access_data_o [get_bd_pins version_bd/usr_access_data_o] [get_bd_pins axil_reg32_0/timestamp_bd]
+  connect_bd_net -net user_init_64b_wrappe_0_value_o [get_bd_pins version_bd/value_o] [get_bd_pins axil_reg32_0/git_hash_bd]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins led_cnt_wrapper_0/clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments

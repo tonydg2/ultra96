@@ -9,7 +9,7 @@ module user_init_64b_wrapper_zynq (
 );
 
 
-  user_init_64b user_init_64b_inst (
+  user_init_64b version_bd (
     .clk      (1'b0),
     .value_o  (value_o)
   );
