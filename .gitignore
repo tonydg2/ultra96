@@ -8,7 +8,12 @@ RM_products*
 
 **vivado*.log
 **vivado*.jou
+**vivado*.str
 
 **/logs/
 **/workspace*/
 sw/work*
+
+/sim/*
+!/sim/*.do 
+!/sim/*.tcl 
