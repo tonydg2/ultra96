@@ -17,3 +17,5 @@ sw/work*
 /sim/*
 !/sim/*.do 
 !/sim/*.tcl 
+*transcript*
+

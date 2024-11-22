@@ -8,4 +8,4 @@ restart
 log -r *
 
 #run 100us
-run 1.5 us
+run 4 us

@@ -8,7 +8,7 @@ set_property -dict [list \
   CONFIG.C_DATA_DEPTH {8192} \
   CONFIG.C_NUM_OF_PROBES {15} \
   CONFIG.C_PROBE0_WIDTH {1} \
-  CONFIG.C_PROBE1_WIDTH {1} \
+  CONFIG.C_PROBE1_WIDTH {8} \
   CONFIG.C_PROBE2_WIDTH {1} \
   CONFIG.C_PROBE3_WIDTH {1} \
 ] [get_ips $modName]

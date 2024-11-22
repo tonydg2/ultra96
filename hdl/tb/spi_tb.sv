@@ -29,9 +29,13 @@ module spi_tb ;
 //-------------------------------------------------------------------------------------------------
   logic [31:0] data;
   logic sclk, csn, din, clk_en;
+  logic [7:0] td0,td1;
+
 
   spi spi(
     .rst    (rst),
+    .td0    (td0),
+    .td1    (td1),
     .ila_clk  (clk),
     .sclk_i (sclk),
     .csn_i  (csn),
@@ -45,6 +49,8 @@ module spi_tb ;
   assign data = {OPCODE,ADDR,8'h0,8'h0};
 
   initial begin 
+    td0     <= 'h01;
+    td1     <= 'h80;
     clk_en  <= '0;
     csn     <= '1;
     din     <= '0;
@@ -57,7 +63,24 @@ module spi_tb ;
       din <= data[idx];
       @(negedge clk25);
     end
-    clk_en <= '0;#50ns; csn <= '1;
+    clk_en <= '0;#50ns; csn <= '1;din <= '0;
+
+    #200ns;
+    td0     <= 'h03;
+    td1     <= 'h02;
+    wait(rst==0);
+    #50ns;
+    csn     <= '0; #50ns; @(negedge clk25);
+    clk_en  <= '1;
+    //for (int idx =  0; idx < $size(data); idx++) begin 
+    for (int idx = 31; idx >=0; idx--) begin 
+      din <= data[idx];
+      @(negedge clk25);
+    end
+    clk_en <= '0;#50ns; csn <= '1;din <= '0;
+
+
+
   end 
 
   assign sclk = (clk_en)? clk25:'0;

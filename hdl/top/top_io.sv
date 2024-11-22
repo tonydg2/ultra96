@@ -63,9 +63,9 @@ module top_io (
     .UART_1_rxd (rx1          ), // IN
     .UART_1_txd (tx1          ), // OUT
     .debug28    (debug28),
-    .debug29    (),
-    .debug30    (),
-    .debug31    (),
+    .debug29    (debug29),
+    .debug30    (debug30),
+    .debug31    (debug31),
     .led_div1_o (led_div1     ),
     .led_o      (RADIO_LED[0] )//Yellow
   );
@@ -95,7 +95,7 @@ module top_io (
   ila1 ila1 (
   	.clk(clk100),
   	.probe0(MOSI),
-  	.probe1(MISO_i),
+  	.probe1(debug29[7:0]),
   	.probe2(SCLK),
   	.probe3(CS),
   	.probe4(CS1),
@@ -113,12 +113,14 @@ module top_io (
 
   spi spi_inst (
     .rst    (~rstn  ),
+    .td0    (debug29[7:0]),
+    .td1    (debug30[7:0]),
     .ila_clk(clk200 ),
     .sclk_i (SCLK   ),
     .csn_i  (CS     ),
     .mosi_i (MOSI   ),
     .miso_o (MISO   )
-);
+  );
 
 
   BUFGCE_DIV #(

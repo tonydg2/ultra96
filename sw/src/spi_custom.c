@@ -105,16 +105,16 @@ int main()
         //Status = SpiCustom0(&SpiInstance, XPAR_XSPIPS_0_BASEADDR);
       } else if (Ch == 'e') {   checkSpiRX();
       } else if (Ch == 'f') {   readSpiRXFIFO();
-      } else if (Ch == 'g') {   Xil_Out32(BD_REG32_ADDR + 0x70, 0x1);
-      } else if (Ch == 'h') {   Xil_Out32(BD_REG32_ADDR + 0x70, 0x2);
-      } else if (Ch == 'i') {   Xil_Out32(BD_REG32_ADDR + 0x70, 0x0);
-      } else if (Ch == 'j') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0x1);
-      } else if (Ch == 'k') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0x0);
-      } else if (Ch == 'l') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0x1);
-      } else if (Ch == 'm') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0x2);
-      } else if (Ch == 'n') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0x0);
-      } else if (Ch == 'o') {   Xil_Out32(BD_REG32_ADDR + 0x7C, 0x1);
-      } else if (Ch == 'q') {   Xil_Out32(BD_REG32_ADDR + 0x7C, 0x0);
+      } else if (Ch == 'g') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0x1); //29 td0
+      } else if (Ch == 'h') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0x3); //31 td1
+      } else if (Ch == 'i') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0x7); //29 td0
+      } else if (Ch == 'j') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0x7); //31 td1
+      } else if (Ch == 'k') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0x6); //29 td0
+      } else if (Ch == 'l') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0x9); //31 td1
+      } else if (Ch == 'm') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0xa); //29 td0
+      } else if (Ch == 'n') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0xb); //31 td1
+      } else if (Ch == 'o') {   Xil_Out32(BD_REG32_ADDR + 0x74, 0xf); //29 td0
+      } else if (Ch == 'q') {   Xil_Out32(BD_REG32_ADDR + 0x78, 0xe); //31 td1
       } else if (Ch == 'r') {   
       }
       //} else if (Ch == '0') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x0);
