@@ -1,18 +1,3 @@
-/*  ADG NOTE
-  Ultra96, clickboard, LCD mini click module
-  - on Slot1 of clickboard
-  ** Requires wire/connection/short modification.
-    AN pin on MIKROBUS connects to CS2 for Digi-pot control,
-    There is no connection on the clickboard to this AN pin.
-    Without adjusting the digi-pot, constrast is too low so 
-    chars are not visible.
-    
-    Using the CS from slot2 on clickboard (CS1), pin26 on 40pinHDR of u96
-    wired to AN pin of MIKROBUS slot1 on clickboard.
-
-*/
-
-
 /******************************************************************************
 * Copyright (C) 2023 Advanced Micro Devices, Inc. All Rights Reserved.
 * SPDX-License-Identifier: MIT
@@ -95,11 +80,7 @@ void configSpiDevice();
 void LCDDisplayOff();
 void LCDDisplayOn();
 void sendCmdLCD(u8 command);
-void sendCharLCD(u8 command);
 u32 SpiPOTSet(u8 value);
-void ConfigMCP();
-void LCDsendChar();
-void LCDsendCharString(const char8 *dispChars, u8 numChars);
 
 
 int main()
@@ -107,16 +88,12 @@ int main()
     init_platform();
     int Status;
     u8 devAddr;
-    char8 testChar;
-
+    
     xil_printf("\n\rtesting adg1234\n\r");
     //check0();    
     versionCtrl();
     configSpiDevice();
     SpiCmd(0x19,CMD_WRITE,0x00);// GPIOB, clear output...
-    SpiPOTSet(0x1E);
-    ConfigMCP();
-    LCDDisplayOn();
 
 	//Status = SpiCmd(); //emio
 	//if (Status != XST_SUCCESS) {xil_printf("FAIL\r\n"); return XST_FAILURE;}
@@ -143,18 +120,21 @@ int main()
       } else if (Ch == 'g') {   SpiCmd(0x05,CMD_READ,0);
       } else if (Ch == 'h') {   SpiCmd(0x0A,CMD_READ,0);
       } else if (Ch == 'i') {   
-      } else if (Ch == 'j') {   LCDsendChar();
-      } else if (Ch == 'k') {   LCDsendCharString("Test666",7);
-      } else if (Ch == 'l') {   LCDsendCharString("Hello World 666 Testing 32 chars",32);
+      } else if (Ch == 'j') {   SpiCmd(0x19,CMD_WRITE,0x38);
+      } else if (Ch == 'k') {   SpiCmd(0x1A,CMD_READ,0);
+      } else if (Ch == 'l') {   
       } else if (Ch == 'm') {   LCDDisplayOff();
       } else if (Ch == 'n') {   LCDDisplayOn();
-      } else if (Ch == 'o') {   
-      } else if (Ch == 'q') {   
+      } else if (Ch == 'o') {   SpiCmd(0x10,CMD_READ,0x00);
+      } else if (Ch == 'q') {   SpiPOTSet(0x1E);
       } else if (Ch == 'r') {   SpiCmd(0x1A,CMD_WRITE,0x5a);
       } else if (Ch == 's') {   SpiCmd(0x1A,CMD_WRITE,0);
       } else if (Ch == 't') {   
       } else if (Ch == 'u') {   
       } else if (Ch == 'v') {   
+        CS_Assert(1);
+        usleep(100);
+        CS_Deassert();          
       }
     }
     xil_printf("\n\r----------------------------------------\n\r");
@@ -239,35 +219,9 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
 /*********************************************************************************************/
 //
 /*********************************************************************************************/
-// single char to first location
-void LCDsendChar() {
-    
-    sendCmdLCD(0x80);  // DDRAM addr 0x00
-    usleep(20000);//20ms
-    
-    sendCharLCD(0x36);  // char code "6"
-    usleep(20000);//20ms
-
-}
-
-// send string of chars starting at first location
-void LCDsendCharString(const char8 *dispChars, u8 numChars) {
-    
-    sendCmdLCD(0x80);  // DDRAM addr 0x00
-    usleep(20000);//20ms
-    
-    for (int x=0; x<numChars; x++) {
-        if (x==16) {
-            sendCmdLCD(0xC0);  // DDRAM addr 0x40 for 2nd row
-            usleep(20000);//20ms
-        }
-        sendCharLCD(dispChars[x]);  // char code
-        usleep(20000);//20ms
-    }
-}
-
 // these work now consistently. i dont understand why the 0x33, then 0x32...
-void LCDDisplayOff() {
+void LCDDisplayOff()
+{
     // Function DB7:0 = 0 0 1 DL, N F x x
     // DL=0, 4bit mode  (1= 8bit)
     // N=1, 2line mode  (0= 1line)
@@ -275,27 +229,27 @@ void LCDDisplayOff() {
     // 0x33 = 8bit mode :Puts in 8bit mode and sends the command twice, so should be assured in 8bit mode follow this with 4bit mode
     // 0x28 = 4bit mode, 2line, 5x8
     
-    sendCmdLCD(0x08);   // display all OFF
-    usleep(20000);//20ms    
-}
-
-void LCDDisplayOn() {
-    sendCmdLCD(0x0F);   // display all ON
-    usleep(20000);//20ms
-}
-
-// this sequence works, I dont understand why. i would expect sequence (0x33,0x28) which does NOT
-// sequence (0x33,0x28,0x28) seems to match data sheet 4bit example (with extra write for 0x33) which shouldn't matter, does NOT work
-// working sequence is (0x33,0x32,0x28)...WHY???
-void ConfigMCP() {
-    
     sendCmdLCD(0x33);   // 8bit, 8bit
     usleep(20000);//20ms
     sendCmdLCD(0x32);   // 8bit, 4bit
     usleep(20000);//20ms
-    sendCmdLCD(0x28);   // 4bit, 2-line
+    sendCmdLCD(0x28);   // 4bit
     usleep(20000);//20ms
+    sendCmdLCD(0x08);   // display all OFF
+    usleep(20000);//20ms
+    
+}
 
+void LCDDisplayOn()
+{
+    sendCmdLCD(0x33);   // 8bit
+    usleep(20000);//20ms
+    sendCmdLCD(0x32);   // 8bit
+    usleep(20000);//20ms
+    sendCmdLCD(0x28);   // 4bit
+    usleep(20000);//20ms
+    sendCmdLCD(0x0F);   // display all ON
+    usleep(20000);//20ms
 }
 
 
@@ -314,29 +268,6 @@ void sendCmdLCD(u8 command) {
 
     // repeat for second 4bits
     cmd = (command & 0x0F) << 4;
-    cmdEn = cmd | 0x08;             // E bit3
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB
-    SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write second 4bits and E to OLATB (ASSERT E)
-    usleep(5);
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB (DEASSERT E)
-    usleep(5);
-}
-
-// single char to the LCD module
-void sendCharLCD(u8 command) {
-    u8 cmd,cmdEn;
-    
-    cmd = (command & 0xF0) | 0x04;  // first 4 bits & RS bit
-    cmdEn = cmd | 0x08;             // E bit3
-    
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write first 4bits to OLATB
-    SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write first 4bits and E to OLATB (ASSERT E)
-    usleep(5);
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write first 4bits to OLATB (DEASSERT E)
-    usleep(5);
-
-    // repeat for second 4bits
-    cmd = ((command & 0x0F) << 4) | 0x04;
     cmdEn = cmd | 0x08;             // E bit3
     SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB
     SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write second 4bits and E to OLATB (ASSERT E)

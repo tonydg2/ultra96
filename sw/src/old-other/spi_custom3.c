@@ -1,18 +1,3 @@
-/*  ADG NOTE
-  Ultra96, clickboard, LCD mini click module
-  - on Slot1 of clickboard
-  ** Requires wire/connection/short modification.
-    AN pin on MIKROBUS connects to CS2 for Digi-pot control,
-    There is no connection on the clickboard to this AN pin.
-    Without adjusting the digi-pot, constrast is too low so 
-    chars are not visible.
-    
-    Using the CS from slot2 on clickboard (CS1), pin26 on 40pinHDR of u96
-    wired to AN pin of MIKROBUS slot1 on clickboard.
-
-*/
-
-
 /******************************************************************************
 * Copyright (C) 2023 Advanced Micro Devices, Inc. All Rights Reserved.
 * SPDX-License-Identifier: MIT
@@ -40,7 +25,6 @@
 #include "xparameters.h"
 #include "helpFunctions.h"
 #include <unistd.h>
-#include <xstatus.h>
 #include "xspips.h"		/* SPI device driver */
 
 
@@ -77,7 +61,7 @@ u8 SpiRegAddrsRD[] = {SPI_CFG, SPI_ISR, SPI_IER, SPI_IDR, SPI_IMR,
 #define BUFFER_SIZE 3
 typedef u8 SPI0_DataBuffer[BUFFER_SIZE];
 
-u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0);
+u32 SpiCustom0(u8 deviceRegAddr, u8 deviceRW, u8 data0);
 void readSpi(u8 addr, int printDbg);
 void writeSpi(u8 addr, u32 data, int printDbg);
 void writeSpiBit(u8 addr, int bitVal, int bitIdx, int printDbg);
@@ -89,36 +73,25 @@ void CS_OFF();  //only CS0
 void CS_Assert(int CSval);
 void CS_Deassert();
 void SPI_Start();
+void writeSpiTX();
 int SpiTXEmpty(int printDbg);
 u32 readSpiRXFIFO(int printRX);
+void spiDisplayOff();
+void spiDisplayOn();
 void configSpiDevice();
-void LCDDisplayOff();
-void LCDDisplayOn();
-void sendCmdLCD(u8 command);
-void sendCharLCD(u8 command);
-u32 SpiPOTSet(u8 value);
-void ConfigMCP();
-void LCDsendChar();
-void LCDsendCharString(const char8 *dispChars, u8 numChars);
-
 
 int main()
 {
     init_platform();
     int Status;
     u8 devAddr;
-    char8 testChar;
-
+    
     xil_printf("\n\rtesting adg1234\n\r");
     //check0();    
     versionCtrl();
     configSpiDevice();
-    SpiCmd(0x19,CMD_WRITE,0x00);// GPIOB, clear output...
-    SpiPOTSet(0x1E);
-    ConfigMCP();
-    LCDDisplayOn();
 
-	//Status = SpiCmd(); //emio
+	//Status = SpiCustom0(); //emio
 	//if (Status != XST_SUCCESS) {xil_printf("FAIL\r\n"); return XST_FAILURE;}
     
     xil_printf("Running...\r\n");
@@ -136,26 +109,33 @@ int main()
         usleep(10000);//10ms
         powerOff();
       } else if (Ch == 'b') {   break;
-      } else if (Ch == 'c') {   SpiCmd(0x01,CMD_READ,0); //emio
+      } else if (Ch == 'c') {   SpiCustom0(0x01,CMD_READ,0); //emio
       } else if (Ch == 'd') {   readSpiAll();
       } else if (Ch == 'e') {   checkSpiRX(0);
       } else if (Ch == 'f') {   readSpiRXFIFO(1);
-      } else if (Ch == 'g') {   SpiCmd(0x05,CMD_READ,0);
-      } else if (Ch == 'h') {   SpiCmd(0x0A,CMD_READ,0);
-      } else if (Ch == 'i') {   
-      } else if (Ch == 'j') {   LCDsendChar();
-      } else if (Ch == 'k') {   LCDsendCharString("Test666",7);
-      } else if (Ch == 'l') {   LCDsendCharString("Hello World 666 Testing 32 chars",32);
-      } else if (Ch == 'm') {   LCDDisplayOff();
-      } else if (Ch == 'n') {   LCDDisplayOn();
-      } else if (Ch == 'o') {   
+      } else if (Ch == 'g') {   SpiCustom0(0x05,CMD_READ,0);
+      } else if (Ch == 'h') {   SpiCustom0(0x0A,CMD_READ,0);
+      } else if (Ch == 'i') {   SpiCustom0(0x0B,CMD_READ,0);
+      } else if (Ch == 'j') {   SpiCustom0(0x19,CMD_WRITE,0x38);
+      } else if (Ch == 'k') {   SpiCustom0(0x1A,CMD_READ,0);
+      } else if (Ch == 'l') {   
+      } else if (Ch == 'm') {   spiDisplayOff();
+      } else if (Ch == 'n') {   spiDisplayOn();
+      } else if (Ch == 'o') {   SpiCustom0(0x10,CMD_READ,0x00);
       } else if (Ch == 'q') {   
-      } else if (Ch == 'r') {   SpiCmd(0x1A,CMD_WRITE,0x5a);
-      } else if (Ch == 's') {   SpiCmd(0x1A,CMD_WRITE,0);
-      } else if (Ch == 't') {   
-      } else if (Ch == 'u') {   
-      } else if (Ch == 'v') {   
+      } else if (Ch == 'r') {   SpiCustom0(0x1A,CMD_WRITE,0x5a);
+      } else if (Ch == 's') {   SpiCustom0(0x1A,CMD_WRITE,0);
+      } else if (Ch == 't') {   SpiCustom0(0x19,CMD_WRITE,0);
+      } else if (Ch == 'u') {   SpiCustom0(0x10,CMD_READ,0);
+      } else if (Ch == 'v') {   SpiCustom0(0x11,CMD_READ,0);
       }
+      //} else if (Ch == '0') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x0);
+      //} else if (Ch == '1') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x1);
+      //} else if (Ch == '2') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x2);
+      //} else if (Ch == '3') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x3);
+      //} else if (Ch == '4') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x4);
+      //} else if (Ch == '5') {Xil_Out32(BD_REG32_ADDR + 0x2C, 0x5);
+      //}
     }
     xil_printf("\n\r----------------------------------------\n\r");
     xil_printf("** END **\n\r");
@@ -166,10 +146,12 @@ int main()
     return 0;
 }
 
-u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
+u32 SpiCustom0(u8 deviceRegAddr, u8 deviceRW, u8 data0)
 {
-    int val;
+    int val,x;
     u32 rdata, readData;
+    // SPI_CFG, SPI_ISR, SPI_IER, SPI_IDR, SPI_IMR,   SPI_EN   
+    // SPI_DLY, SPI_TXD, SPI_RXD, SPI_SIC, SPI_TXTHR, SPI_RXTHR, SPI_MODID
 
     writeSpi(SPI_EN, 0x0, 0);
     readSpi(SPI_ISR, 0);
@@ -183,6 +165,7 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
 
     checkSpiRX(0);
         
+    //xil_printf("Verify RX empty 0's\n\r");
     rdata = readSpiRXFIFO(0);
     if (rdata != 0x00) {
         xil_printf("ERROR PRE verifying empty RX : 0x%2x\n\r",rdata);
@@ -192,25 +175,33 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
     SpiTXEmpty(0);
 
     Xil_Out32(SPI_ADDR + SPI_TXD, deviceRW);// TX 0x41 = READ, 0x40 = WRITE
+    //Xil_Out32(SPI_ADDR + SPI_TXD, 0x01);// TX
     Xil_Out32(SPI_ADDR + SPI_TXD, deviceRegAddr);// TX
     Xil_Out32(SPI_ADDR + SPI_TXD, data0);// TX
+    //Xil_Out32(SPI_ADDR + SPI_TXD, data1);// TX
 
+
+    //CS_ON(); // CS0 enable
     SpiTXEmpty(0);
     xil_printf("SPI transfer...\n\r");
     CS_Assert(0);
     SPI_Start();
+    x=0;
     while (1) {
+        //xil_printf("Check TX empty %d\r\n",x);
+        x++;
         val = SpiTXEmpty(0);
         if (val == 1) {
             CS_Deassert();
             break;
         }
-//        usleep(20000);//20ms
+        usleep(20000);//20ms
     }
-
+    //usleep(1000);//1ms
+    //CS_OFF();
     checkSpiRX(0);
     for (int x = 0;x < 2;x++){readSpiRXFIFO(0);} // command words
-
+    //xil_printf("\n\rRX data:\n\r");   //deviceRegAddr, deviceRW TX 0x41 = READ, 0x40 = WRITE, data0,data1
     if (deviceRW == 0x41) {
         xil_printf("\n\rREAD RX addr 0x%02x\n\r",deviceRegAddr);
         for (int x = 0;x < 1;x++){readData = readSpiRXFIFO(1);} // read words
@@ -221,11 +212,14 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
         xil_printf("\n\r Error OPCODE command = 0x%02x\n\r",deviceRW);
     }
 
+    //xil_printf("\n\rVerify RX empty 0's\n\r");
+    //readSpiRXFIFO(1);
     rdata = readSpiRXFIFO(0);
     if (rdata != 0x00) {
         xil_printf("ERROR POST verifying empty RX : 0x%2x\n\r",rdata);
         return 0xFFFFFFFF;
     }
+
 
     checkSpiRX(0);
     SpiTXEmpty(0);
@@ -239,130 +233,52 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
 /*********************************************************************************************/
 //
 /*********************************************************************************************/
-// single char to first location
-void LCDsendChar() {
-    
-    sendCmdLCD(0x80);  // DDRAM addr 0x00
-    usleep(20000);//20ms
-    
-    sendCharLCD(0x36);  // char code "6"
-    usleep(20000);//20ms
-
-}
-
-// send string of chars starting at first location
-void LCDsendCharString(const char8 *dispChars, u8 numChars) {
-    
-    sendCmdLCD(0x80);  // DDRAM addr 0x00
-    usleep(20000);//20ms
-    
-    for (int x=0; x<numChars; x++) {
-        if (x==16) {
-            sendCmdLCD(0xC0);  // DDRAM addr 0x40 for 2nd row
-            usleep(20000);//20ms
-        }
-        sendCharLCD(dispChars[x]);  // char code
-        usleep(20000);//20ms
-    }
-}
-
-// these work now consistently. i dont understand why the 0x33, then 0x32...
-void LCDDisplayOff() {
-    // Function DB7:0 = 0 0 1 DL, N F x x
-    // DL=0, 4bit mode  (1= 8bit)
-    // N=1, 2line mode  (0= 1line)
-    // F=0, 5x8 mode    (1= 5x11)
-    // 0x33 = 8bit mode :Puts in 8bit mode and sends the command twice, so should be assured in 8bit mode follow this with 4bit mode
-    // 0x28 = 4bit mode, 2line, 5x8
-    
-    sendCmdLCD(0x08);   // display all OFF
-    usleep(20000);//20ms    
-}
-
-void LCDDisplayOn() {
-    sendCmdLCD(0x0F);   // display all ON
-    usleep(20000);//20ms
-}
-
-// this sequence works, I dont understand why. i would expect sequence (0x33,0x28) which does NOT
-// sequence (0x33,0x28,0x28) seems to match data sheet 4bit example (with extra write for 0x33) which shouldn't matter, does NOT work
-// working sequence is (0x33,0x32,0x28)...WHY???
-void ConfigMCP() {
-    
-    sendCmdLCD(0x33);   // 8bit, 8bit
-    usleep(20000);//20ms
-    sendCmdLCD(0x32);   // 8bit, 4bit
-    usleep(20000);//20ms
-    sendCmdLCD(0x28);   // 4bit, 2-line
-    usleep(20000);//20ms
-
-}
-
-
-// single command to the LCD module
-void sendCmdLCD(u8 command) {
-    u8 cmd,cmdEn;
-    
-    cmd = command & 0xF0;   // first 4 bits
-    cmdEn = cmd | 0x08;     // E bit3
-    
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write first 4bits to OLATB
-    SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write first 4bits and E to OLATB (ASSERT E)
-    usleep(5);
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write first 4bits to OLATB (DEASSERT E)
-    usleep(5);
-
-    // repeat for second 4bits
-    cmd = (command & 0x0F) << 4;
-    cmdEn = cmd | 0x08;             // E bit3
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB
-    SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write second 4bits and E to OLATB (ASSERT E)
-    usleep(5);
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB (DEASSERT E)
-    usleep(5);
-}
-
-// single char to the LCD module
-void sendCharLCD(u8 command) {
-    u8 cmd,cmdEn;
-    
-    cmd = (command & 0xF0) | 0x04;  // first 4 bits & RS bit
-    cmdEn = cmd | 0x08;             // E bit3
-    
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write first 4bits to OLATB
-    SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write first 4bits and E to OLATB (ASSERT E)
-    usleep(5);
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write first 4bits to OLATB (DEASSERT E)
-    usleep(5);
-
-    // repeat for second 4bits
-    cmd = ((command & 0x0F) << 4) | 0x04;
-    cmdEn = cmd | 0x08;             // E bit3
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB
-    SpiCmd(0x1A,CMD_WRITE,cmdEn);   // write second 4bits and E to OLATB (ASSERT E)
-    usleep(5);
-    SpiCmd(0x1A,CMD_WRITE,cmd);     // write second 4bits to OLATB (DEASSERT E)
-    usleep(5);
-}
-
-
 void configSpiDevice()
 {
     u32 rdata0,rdata1;
-        
-    rdata0 = SpiCmd(0x05,CMD_READ,0);
-    rdata1 = SpiCmd(0x10,CMD_READ,0);
-    
+    rdata0 = SpiCustom0(0x05,CMD_READ,0);
+    rdata1 = SpiCustom0(0x10,CMD_READ,0);
     if (rdata0 == 0xA0) {
         xil_printf("**** Config already set addr 0x05 = %02x ****\n\r",rdata0);
-        if (rdata1 != 0x00) {xil_printf("OUTPUTS NOT SET addr 0x10 = %02x\n\r",rdata1);}
+        if (rdata1 != 0x03) {xil_printf("OUTPUTS NOT SET addr 0x10 = %02x\n\r",rdata1);}
         return;
     }
 
-    SpiCmd(0x0A,CMD_WRITE,0xA0);// sets device to BANK1 config non-seq addr NO incr
-    SpiCmd(0x10,CMD_WRITE,0x00);//set GPIO [7:2] as outputs, just set ALL as ouptuts
+    SpiCustom0(0x0A,CMD_WRITE,0xA0);// sets device to BANK1 config non-seq addr NO incr
+    SpiCustom0(0x10,CMD_WRITE,0x03);//set GPIO [7:2] as outputs
 }
 
+void spiDisplayOff()
+{
+    SpiCustom0(0x1A,CMD_WRITE,0x38); 
+    SpiCustom0(0x1A,CMD_WRITE,0x30); 
+    usleep(100);
+    SpiCustom0(0x1A,CMD_WRITE,0x28);
+    SpiCustom0(0x1A,CMD_WRITE,0x20);
+    SpiCustom0(0x1A,CMD_WRITE,0x48);
+    SpiCustom0(0x1A,CMD_WRITE,0x40);
+    usleep(100);
+    SpiCustom0(0x1A,CMD_WRITE,0x08);
+    SpiCustom0(0x1A,CMD_WRITE,0x00);
+    SpiCustom0(0x1A,CMD_WRITE,0x88); //OFF
+    SpiCustom0(0x1A,CMD_WRITE,0x80); //OFF
+}
+
+void spiDisplayOn()
+{
+    SpiCustom0(0x1A,CMD_WRITE,0x38); // 0x19 GPIO outputs BANK=1
+    SpiCustom0(0x1A,CMD_WRITE,0x30); // 0x19 GPIO outputs BANK=1
+    usleep(100);
+    SpiCustom0(0x1A,CMD_WRITE,0x28);
+    SpiCustom0(0x1A,CMD_WRITE,0x20);
+    SpiCustom0(0x1A,CMD_WRITE,0x48);
+    SpiCustom0(0x1A,CMD_WRITE,0x40);
+    usleep(100);
+    SpiCustom0(0x1A,CMD_WRITE,0x08);
+    SpiCustom0(0x1A,CMD_WRITE,0x00);
+    SpiCustom0(0x1A,CMD_WRITE,0xF8); //ON
+    SpiCustom0(0x1A,CMD_WRITE,0xF0); //ON
+}
 
 int SpiTXEmpty(int printDbg) 
 {
@@ -446,6 +362,11 @@ u32 readSpiRXFIFO(int printRX)
     return val;
 }
 
+void writeSpiTX()
+{
+
+}
+
 int is_bit_set(int value, int bit_position) 
 {
     return (value & (1 << bit_position)) != 0;
@@ -487,64 +408,4 @@ void CS_Deassert()
     Xil_Out32(SPI_ADDR + SPI_CFG,val);
 }
 
-// this works but on the clickMezz, needed to short the CS in slot2 to the AN pin for slot1
-u32 SpiPOTSet(u8 value)
-{
-    int val;
-    u32 rdata, readData;
 
-    xil_printf("POT Set to %02x\n\r",value);
-
-
-    writeSpi(SPI_EN, 0x0, 0);
-    readSpi(SPI_ISR, 0);
-    readSpi(SPI_RXD, 0);
-    //writeSpi(SPI_ISR, 0x0);// clear mode fault bit1
-    //writeSpi(SPI_CFG, 0x0); //enable mode fail bit17    0x20000
-
-    writeSpi(SPI_CFG, 0x2FC29, 0); //  manual start, manual CS, CS inactive, BAUD64, CLK_PH=0, CLK_POL=0, MASTER mode
-    writeSpi(SPI_TXTHR, 0x1, 0);//set TX threshold 
-    writeSpi(SPI_EN, 0x1, 0);// enable
-
-    checkSpiRX(0);
-        
-    rdata = readSpiRXFIFO(0);
-    if (rdata != 0x00) {
-        xil_printf("ERROR PRE verifying empty RX : 0x%2x\n\r",rdata);
-        return 0xFFFFFFFF;
-    }
-
-    SpiTXEmpty(0);
-
-    Xil_Out32(SPI_ADDR + SPI_TXD, 0x00); // addr for POT wiper0
-    Xil_Out32(SPI_ADDR + SPI_TXD, value); // setting
-
-    SpiTXEmpty(0);
-    xil_printf("SPI transfer...\n\r");
-    CS_Assert(1); // CS1 digi-pot
-    SPI_Start();
-    while (1) {
-        val = SpiTXEmpty(0);
-        if (val == 1) {
-            CS_Deassert();
-            break;
-        }
-//        usleep(20000);//20ms
-    }
-
-    checkSpiRX(0);
-    for (int x = 0;x < 3;x++){readSpiRXFIFO(0);} // just read 3 to flush
-
-    rdata = readSpiRXFIFO(0);
-    if (rdata != 0x00) {
-        xil_printf("ERROR POST verifying empty RX : 0x%2x\n\r",rdata);
-        return 0xFFFFFFFF;
-    }
-
-    checkSpiRX(0);
-    SpiTXEmpty(0);
-
-    /*********************************************************************************************/
-    xil_printf("----------------------------------------\n\r\n\r");
-    return XST_SUCCESS;
-}

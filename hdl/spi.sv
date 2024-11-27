@@ -24,7 +24,7 @@ module spi (
 
   //logic [2:0] bit_idx;
   logic [7:0] opcode='0,addr='0,data_rcv='0,data_snd,data_snd2;
-  logic dout='0,dout_ne='0, opcode_done='0, addr_done='0;
+  logic dout='0,dout_ne='0, opcode_done='0, addr_done='0, data_rcv_done='0;
   integer bit_idx=7;
 
   assign csn = csn_i;
@@ -36,7 +36,7 @@ module spi (
   //assign data_snd2  = td1;
 
   typedef enum {
-    IDLE,GET_OPCODE,GET_ADDR,GET_DATA,SEND_DATA,SEND_DATA2,WAIT
+    IDLE,GET_OPCODE,GET_ADDR,GET_DATA,SEND_DATA,WAIT
   } spi_sm_type;
 
   spi_sm_type SPI_SM;
@@ -59,6 +59,8 @@ module spi (
           addr        <= '0; //clear
           opcode_done <= '0; //clear
           addr_done   <= '0; //clear
+          data_rcv_done <= '0;
+          data_rcv    <= '0;
           bit_idx     <= 7;
           if (~csn) begin 
             opcode[7] <= din; // 1st bit
@@ -82,8 +84,9 @@ module spi (
             addr[0]   <= din;  //last bit
             addr_done <= '1;
             if (opcode[0] == 1'b0) begin 
-              bit_idx   <= 7;
-              SPI_SM  <= GET_DATA;  // write command from SRC, this module will receive data
+              bit_idx     <= 7;
+              //data_rcv[7] <= din;
+              SPI_SM      <= GET_DATA;  // write command from SRC, this module will receive data
             end else begin
               bit_idx   <= 6;
               dout      <= data_snd[7];
@@ -98,7 +101,12 @@ module spi (
           if (bit_idx == 0) begin
             data_rcv[0] <= din;  //last bit
             bit_idx     <= 7;
-            SPI_SM      <= WAIT;
+            SPI_SM      <= IDLE;
+            opcode      <= '0; //clear
+            addr        <= '0; //clear
+            opcode_done <= '0; //clear
+            addr_done   <= '0; //clear
+            data_rcv_done <= '1;
           end else begin
             data_rcv[bit_idx] <= din; 
             bit_idx           <= bit_idx - 1;
@@ -106,29 +114,23 @@ module spi (
         end 
         SEND_DATA: begin //4
           if (bit_idx == 0) begin
-            dout <= data_snd[0];  //last bit
+            dout        <= data_snd[0];  //last bit
             bit_idx     <= 7;
-            SPI_SM      <= SEND_DATA2;
-          end else begin
-            dout  <= data_snd[bit_idx];
-            bit_idx <= bit_idx - 1;
-          end 
-        end 
-        SEND_DATA2: begin //5
-          if (bit_idx == 0) begin
-            dout <= data_snd2[0];  //last bit
-            bit_idx     <= 7;
+            //SPI_SM      <= SEND_DATA2;
             SPI_SM <= WAIT;
             opcode      <= '0; //clear
             addr        <= '0; //clear
             opcode_done <= '0; //clear
             addr_done   <= '0; //clear
           end else begin
-            dout    <= data_snd2[bit_idx];
+            dout    <= data_snd[bit_idx];
             bit_idx <= bit_idx - 1;
           end 
         end 
-        WAIT: SPI_SM <= IDLE; //6
+        WAIT: begin 
+          dout <= '0;         
+          SPI_SM <= IDLE; //6
+        end
       endcase
     end
   end
@@ -147,7 +149,6 @@ module spi (
               (SPI_SM == GET_ADDR     ) ? 'h2 :
               (SPI_SM == GET_DATA     ) ? 'h3 :
               (SPI_SM == SEND_DATA    ) ? 'h4 :
-              (SPI_SM == SEND_DATA2   ) ? 'h5 :
               (SPI_SM == WAIT         ) ? 'h6 : 'h7;
 
   assign idx = bit_idx;
@@ -165,7 +166,9 @@ module spi (
   	.probe8(data_rcv),
   	.probe9(opcode_done),
   	.probe10(addr_done),
-    .probe11(sclk_i)
+    .probe11(sclk_i),
+    .probe12(data_rcv_done),
+    .probe13(data_rcv)
   );
 
 `endif
