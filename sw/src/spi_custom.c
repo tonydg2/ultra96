@@ -1,18 +1,3 @@
-/*  ADG NOTE
-  Ultra96, clickboard, LCD mini click module
-  - on Slot1 of clickboard
-  ** Requires wire/connection/short modification.
-    AN pin on MIKROBUS connects to CS2 for Digi-pot control,
-    There is no connection on the clickboard to this AN pin.
-    Without adjusting the digi-pot, constrast is too low so 
-    chars are not visible.
-    
-    Using the CS from slot2 on clickboard (CS1), pin26 on 40pinHDR of u96
-    wired to AN pin of MIKROBUS slot1 on clickboard.
-
-*/
-
-
 /******************************************************************************
 * Copyright (C) 2023 Advanced Micro Devices, Inc. All Rights Reserved.
 * SPDX-License-Identifier: MIT
@@ -100,6 +85,7 @@ u32 SpiPOTSet(u8 value);
 void ConfigMCP();
 void LCDsendChar();
 void LCDsendCharString(const char8 *dispChars, u8 numChars);
+void LCDShift(u8 command);
 
 
 int main()
@@ -114,7 +100,7 @@ int main()
     versionCtrl();
     configSpiDevice();
     SpiCmd(0x19,CMD_WRITE,0x00);// GPIOB, clear output...
-    SpiPOTSet(0x1E);
+    SpiPOTSet(0x3E);
     ConfigMCP();
     LCDDisplayOn();
 
@@ -149,10 +135,10 @@ int main()
       } else if (Ch == 'm') {   LCDDisplayOff();
       } else if (Ch == 'n') {   LCDDisplayOn();
       } else if (Ch == 'o') {   
-      } else if (Ch == 'q') {   
-      } else if (Ch == 'r') {   SpiCmd(0x1A,CMD_WRITE,0x5a);
-      } else if (Ch == 's') {   SpiCmd(0x1A,CMD_WRITE,0);
-      } else if (Ch == 't') {   
+      } else if (Ch == 'q') {   LCDShift(0x1C); //shift right
+      } else if (Ch == 'r') {   LCDShift(0x18); //shift left
+      } else if (Ch == 's') {   LCDShift(0x14); //cursor right
+      } else if (Ch == 't') {   LCDShift(0x10); //cursor left
       } else if (Ch == 'u') {   
       } else if (Ch == 'v') {   
       }
@@ -196,7 +182,7 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
     Xil_Out32(SPI_ADDR + SPI_TXD, data0);// TX
 
     SpiTXEmpty(0);
-    xil_printf("SPI transfer...\n\r");
+    //xil_printf("SPI transfer...\n\r");
     CS_Assert(0);
     SPI_Start();
     while (1) {
@@ -213,9 +199,9 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
 
     if (deviceRW == 0x41) {
         xil_printf("\n\rREAD RX addr 0x%02x\n\r",deviceRegAddr);
-        for (int x = 0;x < 1;x++){readData = readSpiRXFIFO(1);} // read words
+        for (int x = 0;x < 1;x++){readData = readSpiRXFIFO(0);} // read words
     } else if (deviceRW == 0x40) {
-        xil_printf("\n\r WRITE addr 0x%02x, data 0x%02x\n\r",deviceRegAddr,data0);
+        //xil_printf("\n\r WRITE addr 0x%02x, data 0x%02x\n\r",deviceRegAddr,data0);
         for (int x = 0;x < 1;x++){readSpiRXFIFO(0);} // write words
     } else {
         xil_printf("\n\r Error OPCODE command = 0x%02x\n\r",deviceRW);
@@ -231,7 +217,7 @@ u32 SpiCmd(u8 deviceRegAddr, u8 deviceRW, u8 data0)
     SpiTXEmpty(0);
 
     /*********************************************************************************************/
-    xil_printf("----------------------------------------\n\r\n\r");
+    //xil_printf("----------------------------------------\n\r\n\r");
     return readData;
 }
 
@@ -266,7 +252,7 @@ void LCDsendCharString(const char8 *dispChars, u8 numChars) {
     }
 }
 
-// these work now consistently. i dont understand why the 0x33, then 0x32...
+// these work now consistently. in ConfigMCP i dont understand why the 0x33, then 0x32...
 void LCDDisplayOff() {
     // Function DB7:0 = 0 0 1 DL, N F x x
     // DL=0, 4bit mode  (1= 8bit)
@@ -289,15 +275,31 @@ void LCDDisplayOn() {
 // working sequence is (0x33,0x32,0x28)...WHY???
 void ConfigMCP() {
     
+    /* Function: 0 0 1 DL, N F x x
+    *   DL: 0 4bit mode
+    *   N: 0/1  1line/2line
+    *   F: 0/1  5x8/5x11
+    */
+
     sendCmdLCD(0x33);   // 8bit, 8bit
     usleep(20000);//20ms
     sendCmdLCD(0x32);   // 8bit, 4bit
     usleep(20000);//20ms
-    sendCmdLCD(0x28);   // 4bit, 2-line
+    sendCmdLCD(0x28);   // 4bit, 2-line, 5x8, best option
+    //sendCmdLCD(0x20);   // 4bit, 1-line, 5x8, this is only one line at top
+    //sendCmdLCD(0x24);   // 4bit, 1-line, 5x11, meh
     usleep(20000);//20ms
 
 }
 
+void LCDShift(u8 command) {
+
+    // 0 0 0 1, SC RL x x
+    // 0x1C = shift right, 0x18 = shift left
+    // 0x14 = cursor rght, 0x10 = cursor left
+    sendCmdLCD(command);
+
+}
 
 // single command to the LCD module
 void sendCmdLCD(u8 command) {
