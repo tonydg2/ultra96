@@ -1,4 +1,5 @@
 module top_io (
+    input         INT1_I,     // interrupt clickMezz slot1
     input         UART0_RX_I,
     output        UART0_TX_O,
     input         UART1_RX_I,

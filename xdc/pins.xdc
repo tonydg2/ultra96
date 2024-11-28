@@ -6,7 +6,7 @@ set_property PACKAGE_PIN F7 [get_ports {UART0_RX_I}];#  HD_GPIO_1 pin5
 
 #set_property PACKAGE_PIN A7 [get_ports {RST1_O}];#  HD_GPIO_7
 #set_property PACKAGE_PIN A6 [get_ports {PWM1_O}];#  HD_GPIO_6
-#set_property PACKAGE_PIN G6 [get_ports {INT1_O}];#  HD_GPIO_8
+set_property PACKAGE_PIN G6 [get_ports {INT1_I}];#  HD_GPIO_8
 
 
 # click mezz slot2
