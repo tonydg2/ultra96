@@ -92,7 +92,7 @@ module top_io (
 //  	.probe8(miso_t),
 //  	.probe9(sclk_t)
 //  );
-
+/*
   ila1 ila1 (
   	.clk(clk100),
   	.probe0(MOSI),
@@ -137,7 +137,7 @@ module top_io (
     .CLR('0),       // 1-bit input: Asynchronous clear
     .I(clk100)    // 1-bit input: Buffer
   );
-
+*/
 
 endmodule
 
