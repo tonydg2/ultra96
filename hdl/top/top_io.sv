@@ -15,6 +15,7 @@ module top_io (
   logic MISO,mosi_i,sclk_i,cs0_i,MOSI,MISO_i,miso_o,SCLK,CS,CS1,CS2,mosi_t,cs0_t,miso_t,sclk_t;
   logic emio_spi1_mo_t_0,emio_spi1_s_o_0,emio_spi1_sclk_t_0,emio_spi1_so_t_0,emio_spi1_ss_n_t_0;
   logic emio_spi1_s_i_0,emio_spi1_sclk_i_0,emio_spi1_ss_i_n_0;
+  logic miso1,miso2;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   assign rx0 = UART0_RX_I;
@@ -92,6 +93,7 @@ module top_io (
 //  	.probe9(sclk_t)
 //  );
 
+/*
   ila1 ila1 (
   	.clk(clk100),
   	.probe0(MOSI),
@@ -110,6 +112,7 @@ module top_io (
     .probe13(),
     .probe14()
   );
+*/
 
   spi spi_inst (
     .rst    (~rstn  ),
@@ -119,10 +122,24 @@ module top_io (
     .sclk_i (SCLK   ),
     .csn_i  (CS     ),
     .mosi_i (MOSI   ),
-    .miso_o (MISO   )
+    .miso_o (miso1   )
   );
 
+  spi2 spi2_inst (
+    .rst    (~rstn  ),
+    .td0    (debug29[7:0]),
+    .td1    (debug30[7:0]),
+    .ila_clk(clk200 ),
+    .sclk_i (SCLK   ),
+    .csn_i  (CS     ),
+    .mosi_i (MOSI   ),
+    .miso_o (miso2   )
+  );
 
+  assign MISO = (debug31 == 'h1)? miso2 : miso1;
+
+
+/*
   BUFGCE_DIV #(
     .BUFGCE_DIVIDE(8),              // 1-8
     // Programmable Inversion Attributes: Specifies built-in programmable inversion on specific pins
@@ -136,7 +153,7 @@ module top_io (
     .CLR('0),       // 1-bit input: Asynchronous clear
     .I(clk100)    // 1-bit input: Buffer
   );
-
+*/
 
 endmodule
 

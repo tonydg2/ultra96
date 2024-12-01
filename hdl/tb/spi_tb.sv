@@ -33,20 +33,31 @@ module spi_tb ;
 
 
   spi spi(
-    .rst    (rst),
-    .td0    (td0),
-    .td1    (td1),
+    .rst      (rst),
+    .td0      (td0),
+    .td1      (td1),
     .ila_clk  (clk),
-    .sclk_i (sclk),
-    .csn_i  (csn),
-    .mosi_i (din),
-    .miso_o (dout)
+    .sclk_i   (sclk),
+    .csn_i    (csn),
+    .mosi_i   (din),
+    .miso_o   ()
+  );
+
+  spi2 spi2(
+    .rst      (rst),
+    .td0      (td0),
+    .td1      (td1),
+    .ila_clk  (clk),
+    .sclk_i   (sclk),
+    .csn_i    (csn),
+    .mosi_i   (din),
+    .miso_o   ()
   );
 
   //assign data = 32'b0100_0001_0000_0001_0000_0000_0000_0000;
-  parameter [7:0] OPCODE = 'h41;
+  parameter [7:0] OPCODE = 'h40;
   parameter [7:0] ADDR   = 'h01;
-  assign data = {OPCODE,ADDR,8'h0,8'h0};
+  assign data = {OPCODE,ADDR,8'h00};
 
   initial begin 
     td0     <= 'h80;
@@ -59,7 +70,7 @@ module spi_tb ;
     csn     <= '0; #50ns; @(negedge clk25);
     clk_en  <= '1;
     //for (int idx =  0; idx < $size(data); idx++) begin 
-    for (int idx = 31; idx >=8; idx--) begin // only one byte after commands
+    for (int idx = 23; idx >=0; idx--) begin // only one byte after commands
       din <= data[idx];
       @(negedge clk25);
     end
@@ -73,7 +84,7 @@ module spi_tb ;
     csn     <= '0; #50ns; @(negedge clk25);
     clk_en  <= '1;
     //for (int idx =  0; idx < $size(data); idx++) begin 
-    for (int idx = 31; idx >=8; idx--) begin 
+    for (int idx = 23; idx >=0; idx--) begin 
       din <= data[idx];
       @(negedge clk25);
     end
@@ -87,7 +98,7 @@ module spi_tb ;
     csn     <= '0; #50ns; @(negedge clk25);
     clk_en  <= '1;
     //for (int idx =  0; idx < $size(data); idx++) begin 
-    for (int idx = 31; idx >=8; idx--) begin 
+    for (int idx = 23; idx >=0; idx--) begin 
       din <= data[idx];
       @(negedge clk25);
     end

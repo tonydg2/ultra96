@@ -2,6 +2,7 @@ rm -rf work
 
 #vlog  ../hdl/spi.sv       -sv -work work +define+SIMULATION
 vlog  ../hdl/spi.sv       -sv -work work
+vlog  ../hdl/spi2.sv       -sv -work work
 vlog  ../hdl/tb/spi_tb.sv -sv -work work
 
 vsim  -vopt work.spi_tb -voptargs=+acc

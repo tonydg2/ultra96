@@ -1,10 +1,12 @@
 // SPI SINK, responder to SPI SOURCE
-// emulate SPI responses for MCP23S17 device
+// emulate SPI responses for MCP23S17 device, one byte data send/rcv only in addition to opcode/addr
 // 
 // byte0 = OPCODE + R/W  (Write = 0, Read = 1)
 // byte1 = reg addr
-// byte1+= data
+// byte1+= data (only 1byte read or write)
 //
+// this version is coded 'easy', no "D" and "Q" style coding, single clocked process SM
+//  to compare synthesis results to other version
 
 `timescale 1ns / 1ps  // <time_unit>/<time_precision>
 
@@ -135,7 +137,7 @@ module spi (
     end
   end
 
-
+/*
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // hw debug only, disable for simulation(questa)
 //`ifndef SIMULATION // requires passing in param at compile time (vlog spi.sv +define+SIMULATION)
@@ -173,7 +175,7 @@ module spi (
 
 `endif
 `endif
-
+*/
 
 endmodule
 
