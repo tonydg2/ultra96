@@ -14,9 +14,7 @@ add wave -noupdate /spi_tb/spi/addr
 add wave -noupdate /spi_tb/spi/addr_done
 add wave -noupdate /spi_tb/spi/data_rcv
 add wave -noupdate /spi_tb/spi/data_rcv_done
-add wave -noupdate /spi_tb/spi/dout
 add wave -noupdate -divider spi2
-add wave -noupdate /spi_tb/spi2/dout
 add wave -noupdate /spi_tb/spi2/SPI_STATE
 add wave -noupdate -radix unsigned /spi_tb/spi2/bit_idx
 add wave -noupdate /spi_tb/spi2/opcode
@@ -26,7 +24,7 @@ add wave -noupdate /spi_tb/spi2/addr_done
 add wave -noupdate /spi_tb/spi2/data_rcv
 add wave -noupdate /spi_tb/spi2/data_rcv_done
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1079012 ps} 0}
+WaveRestoreCursors {{Cursor 1} {686127 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100

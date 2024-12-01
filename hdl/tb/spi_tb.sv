@@ -55,7 +55,7 @@ module spi_tb ;
   );
 
   //assign data = 32'b0100_0001_0000_0001_0000_0000_0000_0000;
-  parameter [7:0] OPCODE = 'h40;
+  parameter [7:0] OPCODE = 'h41;
   parameter [7:0] ADDR   = 'h01;
   assign data = {OPCODE,ADDR,8'h00};
 

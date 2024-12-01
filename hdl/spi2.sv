@@ -46,7 +46,9 @@ module spi2 (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
   
   always_ff @(negedge sclk_i) begin 
-    dout_ne <= dout;
+    //dout_ne <= dout;
+    if (SPI_STATE == SEND_DATA)   dout_ne  <= td0[bit_idx]; 
+    else if (SPI_STATE == WAIT)   dout_ne  <= '0; 
   end
 
   always_ff @(posedge sclk_i) begin
@@ -89,97 +91,49 @@ module spi2 (
         data_rcv[bit_idx] <= din; 
         if (bit_idx == 0) data_rcv_done <= '1;
         else              data_rcv_done <= '0;
-      end else if (SPI_STATE == SEND_DATA) begin 
-        //dout <= td0[bit_idx];
-      end else if (SPI_STATE == WAIT) begin 
-        //dout <= '0;
+      //end else if (SPI_STATE == SEND_DATA) begin 
+      //end else if (SPI_STATE == WAIT) begin 
       end 
     end 
   end 
 
   always_comb begin 
-      case (SPI_STATE) 
-        IDLE: begin //0
-          //data_snd      <= td0;
-          //data_snd2     <= td1;
-          //opcode[6:0]   <= '0; //clear
-          //addr          <= '0; //clear
-          //opcode_done   <= '0; //clear
-          //addr_done     <= '0; //clear
-          //data_rcv_done <= '0;
-          //data_rcv      <= '0;
-          //bit_idx       <= 7;
-          //if (~csn) begin 
-            //opcode[7]       <= din; // 1st bit
-            //bit_idx         <= bit_idx - 1;
-            SPI_STATE_NEXT  <= GET_OPCODE; 
-          //end
-        end
-        GET_OPCODE: begin //1
-          if (bit_idx == 0) begin
-            //opcode[0]       <= din;  //last bit
-            //bit_idx         <= 7;
-            //opcode_done     <= '1;
-            SPI_STATE_NEXT  <= GET_ADDR; 
-          end else begin
-            //opcode[bit_idx] <= din;
-            //bit_idx         <= bit_idx - 1;
-          end 
-        end
-        GET_ADDR: begin //2
-          if (bit_idx == 0) begin
-            //addr[0]   <= din;  //last bit
-            //addr_done <= '1;
-            if (opcode[0] == 1'b0) begin 
-              //bit_idx         <= 7;
-              SPI_STATE_NEXT  <= GET_DATA;  // write command from SRC, this module will receive data
-            end else begin
-              //bit_idx         <= 6;
-              //dout            <= data_snd[7];
-              SPI_STATE_NEXT  <= SEND_DATA; // read command from SRC, this module will send data to SRC
-            end
-          end else begin
-            //addr[bit_idx] <= din; 
-            //bit_idx       <= bit_idx - 1;
-          end 
-        end
-        GET_DATA: begin //3
-          if (bit_idx == 0) begin
-            //data_rcv[0]     <= din;  //last bit
-            //bit_idx         <= 7;
-            SPI_STATE_NEXT  <= IDLE;
-            //opcode          <= '0; //clear
-            //addr            <= '0; //clear
-            //opcode_done     <= '0; //clear
-            //addr_done       <= '0; //clear
-            //data_rcv_done   <= '1;
-          end else begin
-            //data_rcv[bit_idx] <= din; 
-            //bit_idx           <= bit_idx - 1;
-          end 
+    case (SPI_STATE) 
+      IDLE: begin //0
+          SPI_STATE_NEXT  <= GET_OPCODE; 
+      end
+      GET_OPCODE: begin //1
+        if (bit_idx == 0) begin
+          SPI_STATE_NEXT  <= GET_ADDR; 
         end 
-        SEND_DATA: begin //4
-          if (bit_idx == 0) begin
-            //dout            <= data_snd[0];  //last bit
-            dout            <= td0[0];  //last bit
-            //bit_idx         <= 7;
-            SPI_STATE_NEXT  <= WAIT;
-            //opcode          <= '0; //clear
-            //addr            <= '0; //clear
-            //opcode_done     <= '0; //clear
-            //addr_done       <= '0; //clear
+      end
+      GET_ADDR: begin //2
+        if (bit_idx == 0) begin
+          if (opcode[0] == 1'b0) begin 
+            SPI_STATE_NEXT  <= GET_DATA;  
           end else begin
-            //dout    <= data_snd[bit_idx];
-            dout    <= td0[bit_idx];
-            //bit_idx <= bit_idx - 1;
-          end 
+            SPI_STATE_NEXT  <= SEND_DATA;
+          end
         end 
-        WAIT: begin 
-          dout <= '0;         
-          SPI_STATE_NEXT <= IDLE; //6
-        end
-      endcase
-    
+      end
+      GET_DATA: begin //3
+        if (bit_idx == 0) begin
+          SPI_STATE_NEXT  <= IDLE;
+        end 
+      end 
+      SEND_DATA: begin //4
+        if (bit_idx == 0) begin
+          //dout            <= td0[0];  //last bit
+          SPI_STATE_NEXT  <= WAIT;
+        end else begin
+          //dout    <= td0[bit_idx];
+        end 
+      end 
+      WAIT: begin 
+        //dout <= '0;         
+        SPI_STATE_NEXT <= IDLE; //6
+      end
+    endcase
   end
 
 
