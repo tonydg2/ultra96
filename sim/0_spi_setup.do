@@ -9,4 +9,4 @@ if {![file exists modelsim.ini]} {vmap -c }
 #log -r /*
 #run 100us
 
-do spi_run.do
+do 1_spi_run.do

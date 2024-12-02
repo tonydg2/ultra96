@@ -15,7 +15,7 @@ module top_io (
   logic MISO,mosi_i,sclk_i,cs0_i,MOSI,MISO_i,miso_o,SCLK,CS,CS1,CS2,mosi_t,cs0_t,miso_t,sclk_t;
   logic emio_spi1_mo_t_0,emio_spi1_s_o_0,emio_spi1_sclk_t_0,emio_spi1_so_t_0,emio_spi1_ss_n_t_0;
   logic emio_spi1_s_i_0,emio_spi1_sclk_i_0,emio_spi1_ss_i_n_0;
-  logic miso1,miso2;
+  logic miso1,miso2,miso3,miso4;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   assign rx0 = UART0_RX_I;
@@ -136,7 +136,31 @@ module top_io (
     .miso_o (miso2   )
   );
 
-  assign MISO = (debug31 == 'h1)? miso2 : miso1;
+  spi3 spi3_inst (
+    .rst    (~rstn  ),
+    .td0    (debug29[7:0]),
+    .td1    (debug30[7:0]),
+    .ila_clk(clk200 ),
+    .sclk_i (SCLK   ),
+    .csn_i  (CS     ),
+    .mosi_i (MOSI   ),
+    .miso_o (miso3   )
+  );
+
+  spi4 spi4_inst (
+    .rst    (~rstn  ),
+    .td0    (debug29[7:0]),
+    .td1    (debug30[7:0]),
+    .ila_clk(clk200 ),
+    .sclk_i (SCLK   ),
+    .csn_i  (CS     ),
+    .mosi_i (MOSI   ),
+    .miso_o (miso4   )
+  );
+
+  assign MISO = (debug31 == 'h2)? miso2 : 
+                (debug31 == 'h3)? miso3 :
+                (debug31 == 'h4)? miso4 : miso1;
 
 
 /*

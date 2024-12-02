@@ -27,9 +27,9 @@ module spi_tb ;
 //-------------------------------------------------------------------------------------------------
 //
 //-------------------------------------------------------------------------------------------------
-  logic [31:0] data;
+  logic [23:0] data;
   logic sclk, csn, din, clk_en;
-  logic [7:0] td0,td1;
+  logic [7:0] td0,td1,opcode,addr;
 
 
   spi spi(
@@ -54,17 +54,42 @@ module spi_tb ;
     .miso_o   ()
   );
 
+  spi3 spi3(
+    .rst      (rst),
+    .td0      (td0),
+    .td1      (td1),
+    .ila_clk  (clk),
+    .sclk_i   (sclk),
+    .csn_i    (csn),
+    .mosi_i   (din),
+    .miso_o   ()
+  );
+
+  spi4 spi4(
+    .rst      (rst),
+    .td0      (td0),
+    .td1      (td1),
+    .ila_clk  (clk),
+    .sclk_i   (sclk),
+    .csn_i    (csn),
+    .mosi_i   (din),
+    .miso_o   ()
+  );
+
+
   //assign data = 32'b0100_0001_0000_0001_0000_0000_0000_0000;
-  parameter [7:0] OPCODE = 'h41;
-  parameter [7:0] ADDR   = 'h01;
-  assign data = {OPCODE,ADDR,8'h00};
+  //parameter [7:0] OPCODE = 'h41;
+  //parameter [7:0] ADDR   = 'h01;
+  //assign          data = {OPCODE,ADDR,8'h00};
 
   initial begin 
-    td0     <= 'h80;
-    td1     <= 'hff;
+    td0     <= 'h81;
     clk_en  <= '0;
     csn     <= '1;
     din     <= '0;
+    opcode = 'h41; addr = 'h01;
+    #1ns;
+    data = {opcode,addr,8'h00};
     wait(rst==0);
     #50ns;
     csn     <= '0; #50ns; @(negedge clk25);
@@ -78,7 +103,10 @@ module spi_tb ;
 
     // ----------
     #200ns;
-    td0     <= 'h03;
+    opcode = 'h41; addr = 'h81;
+    #1ns;
+    data = {opcode,addr,8'h00};   
+    td0     <= 'hc5;
     wait(rst==0);
     #50ns;
     csn     <= '0; #50ns; @(negedge clk25);
@@ -92,6 +120,9 @@ module spi_tb ;
 
     // ----------
     #200ns;
+    opcode = 'h40; addr = 'h85;
+    #1ns;
+    data = {opcode,addr,8'hc5};
     td0     <= 'hC0;
     wait(rst==0);
     #50ns;
@@ -104,6 +135,22 @@ module spi_tb ;
     end
     clk_en <= '0;#50ns; csn <= '1;din <= '0;
 
+    // ----------
+    #200ns;
+    opcode = 'h40; addr = 'hc5;
+    #1ns;
+    data = {opcode,addr,8'h81};
+    td0     <= 'ha5;
+    wait(rst==0);
+    #50ns;
+    csn     <= '0; #50ns; @(negedge clk25);
+    clk_en  <= '1;
+    //for (int idx =  0; idx < $size(data); idx++) begin 
+    for (int idx = 23; idx >=0; idx--) begin 
+      din <= data[idx];
+      @(negedge clk25);
+    end
+    clk_en <= '0;#50ns; csn <= '1;din <= '0;
 
   end 
 

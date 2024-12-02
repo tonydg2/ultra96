@@ -125,8 +125,6 @@ module spi2 (
         if (bit_idx == 0) begin
           //dout            <= td0[0];  //last bit
           SPI_STATE_NEXT  <= WAIT;
-        end else begin
-          //dout    <= td0[bit_idx];
         end 
       end 
       WAIT: begin 
