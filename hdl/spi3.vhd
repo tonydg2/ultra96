@@ -46,6 +46,11 @@ architecture rtl of spi3 is
 
   signal bit_idx  : integer range 0 to 7 := 7;
 
+
+  signal testd  : std_logic_vector(7 downto 0):= x"38";
+  signal testo  : std_logic_vector(7 downto 0):= x"00";
+  signal sm     : std_logic_vector(2 downto 0);
+  signal idx    : std_logic_vector(2 downto 0);
 ----------------------------------------------------------------------------------------------------
 begin  -- architecture
 -------------------------------------------------------------------------------------------------       
@@ -148,6 +153,40 @@ sm_proc : process(sclk_i) begin
     end case;
   end if;
 end process;
+
+---------------------------------------------------------------------------------------------------
+-- debug
+---------------------------------------------------------------------------------------------------
+
+
+  sm <= "000" when (SPI_SM = IDLE         ) else
+        "001" when (SPI_SM = GET_OPCODE   ) else
+        "010" when (SPI_SM = GET_ADDR     ) else
+        "011" when (SPI_SM = GET_DATA     ) else
+        "100" when (SPI_SM = SEND_DATA    ) else
+        "110" when (SPI_SM = SWAIT        ) else
+        "111";
+
+  idx <= std_logic_vector(to_unsigned(bit_idx,3));
+  
+--  ila2 : entity work.ila2
+--  	port map (
+--      clk      => ila_clk        ,
+--  	  probe0   => sm             ,
+--  	  probe1   => csn            ,
+--  	  probe2   => din            ,
+--  	  probe3   => dout_ne        ,
+--  	  probe4   => idx            ,
+--  	  probe5   => data_snd       ,
+--  	  probe6   => opcode         ,
+--  	  probe7   => addr           ,
+--  	  probe8   => data_rcv       ,
+--  	  probe9   => opcode_done    ,
+--  	  probe10  => addr_done      ,
+--      probe11  => sclk_i         ,
+--      probe12  => data_rcv_done  ,
+--      probe13  => data_rcv       
+--  );
 
 
 

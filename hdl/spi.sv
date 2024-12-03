@@ -160,7 +160,7 @@ module spi (
   	.probe0(sm),
   	.probe1(csn),
   	.probe2(din),
-  	.probe3(dout),
+  	.probe3(dout_ne),
   	.probe4(idx),
   	.probe5(data_snd),
   	.probe6(opcode),
@@ -174,8 +174,8 @@ module spi (
   );
 
 `endif
-`endif
-*/
+`endif  //*/
+
 
 endmodule
 

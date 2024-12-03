@@ -103,7 +103,7 @@ module top_io (
   	.probe4(CS1),
   	.probe5(MISO),
   	.probe6(CS2),
-  	.probe7(),
+  	.probe7(debug31[3:0]),
   	.probe8(),
   	.probe9(),
   	.probe10(),
@@ -125,6 +125,7 @@ module top_io (
     .miso_o (miso1   )
   );
 
+//  (* dont_touch = "true" *) spi2 spi2_inst (
   spi2 spi2_inst (
     .rst    (~rstn  ),
     .td0    (debug29[7:0]),
@@ -149,7 +150,7 @@ module top_io (
 
   spi4 spi4_inst (
     .rst    (~rstn  ),
-    .td0    (debug29[7:0]),
+    .td0    (debug29[7:0]), //0x74
     .td1    (debug30[7:0]),
     .ila_clk(clk200 ),
     .sclk_i (SCLK   ),
@@ -158,9 +159,10 @@ module top_io (
     .miso_o (miso4   )
   );
 
+
   assign MISO = (debug31 == 'h2)? miso2 : 
                 (debug31 == 'h3)? miso3 :
-                (debug31 == 'h4)? miso4 : miso1;
+                (debug31 == 'h4)? miso4 : miso1;  //0x7C
 
 
 /*

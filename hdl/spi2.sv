@@ -48,7 +48,8 @@ module spi2 (
   always_ff @(negedge sclk_i) begin 
     //dout_ne <= dout;
     if (SPI_STATE == SEND_DATA)   dout_ne  <= td0[bit_idx]; 
-    else if (SPI_STATE == WAIT)   dout_ne  <= '0; 
+    //else if (SPI_STATE == WAIT)   dout_ne  <= '0; 
+    else dout_ne  <= '0;
   end
 
   always_ff @(posedge sclk_i) begin
@@ -100,36 +101,34 @@ module spi2 (
   always_comb begin 
     case (SPI_STATE) 
       IDLE: begin //0
-          SPI_STATE_NEXT  <= GET_OPCODE; 
+          SPI_STATE_NEXT  = GET_OPCODE; 
       end
       GET_OPCODE: begin //1
         if (bit_idx == 0) begin
-          SPI_STATE_NEXT  <= GET_ADDR; 
-        end 
+          SPI_STATE_NEXT  = GET_ADDR; 
+        end else SPI_STATE_NEXT = SPI_STATE;
       end
       GET_ADDR: begin //2
-        if (bit_idx == 0) begin
+        if ((bit_idx == 0)) begin
           if (opcode[0] == 1'b0) begin 
-            SPI_STATE_NEXT  <= GET_DATA;  
+            SPI_STATE_NEXT  = GET_DATA;  
           end else begin
-            SPI_STATE_NEXT  <= SEND_DATA;
+            SPI_STATE_NEXT  = SEND_DATA;
           end
-        end 
+        end else SPI_STATE_NEXT = SPI_STATE;
       end
       GET_DATA: begin //3
         if (bit_idx == 0) begin
-          SPI_STATE_NEXT  <= IDLE;
-        end 
+          SPI_STATE_NEXT  = IDLE;
+        end else SPI_STATE_NEXT = SPI_STATE;
       end 
       SEND_DATA: begin //4
         if (bit_idx == 0) begin
-          //dout            <= td0[0];  //last bit
-          SPI_STATE_NEXT  <= WAIT;
-        end 
+          SPI_STATE_NEXT  = IDLE;//WAIT;
+        end else SPI_STATE_NEXT = SPI_STATE;
       end 
       WAIT: begin 
-        //dout <= '0;         
-        SPI_STATE_NEXT <= IDLE; //6
+        SPI_STATE_NEXT = IDLE; //6
       end
     endcase
   end
@@ -140,8 +139,6 @@ module spi2 (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // hw debug only, disable for simulation(questa)
 //`ifndef SIMULATION // requires passing in param at compile time (vlog spi.sv +define+SIMULATION)
-`ifndef QUESTA
-`ifndef MODELSIM
 
   logic [2:0] sm,idx;
 
@@ -154,12 +151,15 @@ module spi2 (
 
   assign idx = bit_idx;
 
+`ifndef QUESTA
+`ifndef MODELSIM
+
   ila2 ila2 (
   	.clk(ila_clk),   // input wire clk
   	.probe0(sm),
   	.probe1(csn),
   	.probe2(din),
-  	.probe3(dout),
+  	.probe3(dout_ne),
   	.probe4(idx),
   	.probe5(data_snd),
   	.probe6(opcode),
@@ -173,8 +173,8 @@ module spi2 (
   );
 
 `endif
-`endif
-*/
+`endif  //*/
+
 
 endmodule
 
