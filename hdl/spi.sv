@@ -27,7 +27,7 @@ module spi (
   //logic [2:0] bit_idx;
   logic [7:0] opcode='0,addr='0,data_rcv='0,data_snd,data_snd2;
   logic dout='0,dout_ne='0, opcode_done='0, addr_done='0, data_rcv_done='0;
-  integer bit_idx=7;
+  logic [2:0] bit_idx='h7;
 
   assign csn = csn_i;
   assign din = mosi_i;
@@ -63,7 +63,7 @@ module spi (
           addr_done   <= '0; //clear
           data_rcv_done <= '0;
           data_rcv    <= '0;
-          bit_idx     <= 7;
+          bit_idx     <= 'h7;
           if (~csn) begin 
             opcode[7] <= din; // 1st bit
             bit_idx   <= bit_idx - 1;
@@ -82,15 +82,15 @@ module spi (
           end 
         end
         GET_ADDR: begin //2
-          if (bit_idx == 0) begin
+          if (bit_idx == '0) begin
             addr[0]   <= din;  //last bit
             addr_done <= '1;
             if (opcode[0] == 1'b0) begin 
-              bit_idx     <= 7;
+              bit_idx     <= 'h7;
               //data_rcv[7] <= din;
               SPI_SM      <= GET_DATA;  // write command from SRC, this module will receive data
             end else begin
-              bit_idx   <= 6;
+              bit_idx   <= 'h6;
               dout      <= data_snd[7];
               SPI_SM    <= SEND_DATA; // read command from SRC, this module will send data to SRC
             end
@@ -102,7 +102,7 @@ module spi (
         GET_DATA: begin //3
           if (bit_idx == 0) begin
             data_rcv[0] <= din;  //last bit
-            bit_idx     <= 7;
+            bit_idx     <= 'h7;
             SPI_SM      <= IDLE;
             opcode      <= '0; //clear
             addr        <= '0; //clear
@@ -115,9 +115,9 @@ module spi (
           end 
         end 
         SEND_DATA: begin //4
-          if (bit_idx == 0) begin
+          if (bit_idx == '0) begin
             dout        <= data_snd[0];  //last bit
-            bit_idx     <= 7;
+            bit_idx     <= 'h7;
             //SPI_SM      <= SEND_DATA2;
             SPI_SM <= WAIT;
             opcode      <= '0; //clear
