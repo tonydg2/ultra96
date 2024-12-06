@@ -41,7 +41,7 @@ add wave -noupdate -group spi4 /spi_tb/spi4/addr_done
 add wave -noupdate -group spi4 /spi_tb/spi4/data_rcv
 add wave -noupdate -group spi4 /spi_tb/spi4/data_rcv_done
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {976791 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1584490 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
