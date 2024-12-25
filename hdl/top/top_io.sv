@@ -31,32 +31,33 @@ module top_io (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   top_bd_wrapper top_bd_wrapper_inst (
-    .AXIL_M0_araddr   (AXIL_araddr  ),
-    .AXIL_M0_arprot   (AXIL_arprot  ),
-    .AXIL_M0_arready  (AXIL_arready ),
-    .AXIL_M0_arvalid  (AXIL_arvalid ),
-    .AXIL_M0_awaddr   (AXIL_awaddr  ),
-    .AXIL_M0_awprot   (AXIL_awprot  ),
-    .AXIL_M0_awready  (AXIL_awready ),
-    .AXIL_M0_awvalid  (AXIL_awvalid ),
-    .AXIL_M0_bready   (AXIL_bready  ),
-    .AXIL_M0_bresp    (AXIL_bresp   ),
-    .AXIL_M0_bvalid   (AXIL_bvalid  ),
-    .AXIL_M0_rdata    (AXIL_rdata   ),
-    .AXIL_M0_rready   (AXIL_rready  ),
-    .AXIL_M0_rresp    (AXIL_rresp   ),
-    .AXIL_M0_rvalid   (AXIL_rvalid  ),
-    .AXIL_M0_wdata    (AXIL_wdata   ),
-    .AXIL_M0_wready   (AXIL_wready  ),
-    .AXIL_M0_wstrb    (AXIL_wstrb   ),
-    .AXIL_M0_wvalid   (AXIL_wvalid  ),
-    .peripheral_rstn  (periph_rstn  ),
+//    .AXIL_M0_araddr   (AXIL_araddr  ),
+//    .AXIL_M0_arprot   (AXIL_arprot  ),
+//    .AXIL_M0_arready  (AXIL_arready ),
+//    .AXIL_M0_arvalid  (AXIL_arvalid ),
+//    .AXIL_M0_awaddr   (AXIL_awaddr  ),
+//    .AXIL_M0_awprot   (AXIL_awprot  ),
+//    .AXIL_M0_awready  (AXIL_awready ),
+//    .AXIL_M0_awvalid  (AXIL_awvalid ),
+//    .AXIL_M0_bready   (AXIL_bready  ),
+//    .AXIL_M0_bresp    (AXIL_bresp   ),
+//    .AXIL_M0_bvalid   (AXIL_bvalid  ),
+//    .AXIL_M0_rdata    (AXIL_rdata   ),
+//    .AXIL_M0_rready   (AXIL_rready  ),
+//    .AXIL_M0_rresp    (AXIL_rresp   ),
+//    .AXIL_M0_rvalid   (AXIL_rvalid  ),
+//    .AXIL_M0_wdata    (AXIL_wdata   ),
+//    .AXIL_M0_wready   (AXIL_wready  ),
+//    .AXIL_M0_wstrb    (AXIL_wstrb   ),
+//    .AXIL_M0_wvalid   (AXIL_wvalid  ),
+//    .peripheral_rstn  (periph_rstn  ),
     .clk100           (clk100       ),
-    .rstn             (rstn         ),
-    .led_div1_o       (led_div1     ),
-    .led_o            (RADIO_LED[0] )//Yellow
+    .rstn             (rstn         )
+//    .led_div1_o       (led_div1     ),
+//    .led_o            (RADIO_LED[0] )//Yellow
   );
 
+/*
 	axil_reg32_2 #(
 		.C_S_AXI_DATA_WIDTH(DATAW),
 		.C_S_AXI_ADDR_WIDTH(ADDRW)
@@ -88,13 +89,22 @@ module top_io (
 		.S_AXI_RVALID  (AXIL_rvalid ),
 		.S_AXI_RREADY  (AXIL_rready )
 	);
+*/
 
   led_cnt led_cnt_inst (
     .rst      (~rstn        ),
     .clk100   (clk100       ),
-    .div_i    (led_div1     ),
+    .div_i    ('0           ),
     .wren_i   ('0           ),
     .led_o    (RADIO_LED[1] ) //BLUE
+  );
+
+  led_cnt led_cnt_inst2 (
+    .rst      (~rstn        ),
+    .clk100   (clk100       ),
+    .div_i    ('hA          ),
+    .wren_i   ('0           ),
+    .led_o    (RADIO_LED[0] ) //yel
   );
 
 
