@@ -139,7 +139,6 @@ if { $bCheckIPs == 1 } {
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:zynq_ultra_ps_e:3.5\
 xilinx.com:ip:smartconnect:1.0\
-xilinx.com:ip:clk_wiz:6.0\
 "
 
    set list_ips_missing ""
@@ -782,7 +781,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
     CONFIG.PSU__USB__RESET__POLARITY {Active Low} \
     CONFIG.PSU__USE__M_AXI_GP0 {1} \
     CONFIG.PSU__USE__M_AXI_GP2 {0} \
-    CONFIG.PSU__USE__VIDEO {1} \
+    CONFIG.PSU__USE__VIDEO {0} \
   ] $zynq_ultra_ps_e_0
 
 
@@ -794,20 +793,6 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   ] $smartconnect_0
 
 
-  # Create instance: clk_wiz_0, and set properties
-  set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0 ]
-  set_property -dict [list \
-    CONFIG.CLKOUT1_JITTER {250.227} \
-    CONFIG.CLKOUT1_PHASE_ERROR {394.762} \
-    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {74.250} \
-    CONFIG.CLK_OUT1_PORT {clk_74p25} \
-    CONFIG.MMCM_CLKFBOUT_MULT_F {111.375} \
-    CONFIG.MMCM_CLKOUT0_DIVIDE_F {15.000} \
-    CONFIG.MMCM_DIVCLK_DIVIDE {10} \
-    CONFIG.USE_RESET {false} \
-  ] $clk_wiz_0
-
-
   # Create interface connections
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axil_reg32_0/S_AXI] [get_bd_intf_pins smartconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD] [get_bd_intf_pins smartconnect_0/S00_AXI]
@@ -815,14 +800,13 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   # Create port connections
   connect_bd_net -net axil_reg32_0_led_div0_o [get_bd_pins axil_reg32_0/led_div0_o] [get_bd_pins led_cnt_wrapper_0/div_i]
   connect_bd_net -net axil_reg32_0_led_div1_o [get_bd_pins axil_reg32_0/led_div1_o] [get_bd_ports led_div1_o]
-  connect_bd_net -net clk_wiz_0_clk_74p25 [get_bd_pins clk_wiz_0/clk_74p25] [get_bd_pins zynq_ultra_ps_e_0/dp_video_in_clk]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins led_cnt_wrapper_0/rst]
   connect_bd_net -net user_init_64b_wrappe_0_usr_access_data_o [get_bd_pins user_init_64b_wrappe_0/usr_access_data_o] [get_bd_pins axil_reg32_0/timestamp]
   connect_bd_net -net user_init_64b_wrappe_0_value_o [get_bd_pins user_init_64b_wrappe_0/value_o] [get_bd_pins axil_reg32_0/git_hash]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK] [get_bd_pins led_cnt_wrapper_0/clk100] [get_bd_pins clk_wiz_0/clk_in1]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins axil_reg32_0/S_AXI_ACLK] [get_bd_pins led_cnt_wrapper_0/clk100]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments
