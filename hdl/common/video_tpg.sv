@@ -16,11 +16,18 @@ module video_tpg #(
   output                  m_axis_tdest
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  localparam [23:0]   GRN = 24'h00FF00;
-  localparam [23:0]   RED = 24'hFF0000;
+
   localparam [10:0]   SCRN_WIDTH = 1280;
   localparam [9:0]    SCRN_HEIGHT = 720;
+
+  localparam [23:0]   GRN = 24'h0000FF;
+  localparam [23:0]   RED = 24'h00FF00;
+  localparam [23:0]   BLU = 24'hFF0000;
+
+  localparam [23:0]   SCRN_TOP = GRN;
+  localparam [23:0]   SCRN_BOT = RED;
+
+
   
 
   logic [DATAW-1:0]   tdata;
@@ -63,7 +70,10 @@ module video_tpg #(
     end 
   end 
 
-  assign tdata = (cntY_Vert > (SCRN_HEIGHT/2)) ? RED:GRN;
+  //assign tdata = (cntY_Vert > (SCRN_HEIGHT/2)) ? SCRN_BOT:SCRN_TOP; // works for top/bot
+  assign tdata = (cntY_Vert < (SCRN_HEIGHT/2)) ? SCRN_TOP:
+                 (cntX_Horz < (SCRN_WIDTH/2)) ? SCRN_BOT:BLU;// left:rigth
+  
   assign tuser = ((cntX_Horz == '0) && (cntY_Vert == '0)) ? '1:'0;
   assign tlast = (cntX_Horz == (SCRN_WIDTH - 1)) ? '1:'0;
 
