@@ -17,8 +17,8 @@ module video_tpg #(
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  localparam [10:0]   SCRN_WIDTH = 1280;
-  localparam [9:0]    SCRN_HEIGHT = 720;
+  localparam [10:0]   SCRN_WIDTH = 1920;//1280; //1920
+  localparam [9:0]    SCRN_HEIGHT = 1080;//720;  //1080
 
   localparam [23:0]   GRN = 24'h0000FF;
   localparam [23:0]   RED = 24'h00FF00;
