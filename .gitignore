@@ -1,5 +1,6 @@
 # git is case sensitive by default
 output_products*
+out_*
 PRJ* 
 DEFAULT_PROJECT*
 RM_products*

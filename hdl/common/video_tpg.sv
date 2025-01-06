@@ -1,6 +1,8 @@
 
 module video_tpg #(
-  parameter integer DATAW = 32
+  parameter integer DATAW = 32,
+  parameter integer SCRW  = 1280,
+  parameter integer SCRH  = 720
 ) (
   input                   rst           ,
   input                   clk           ,
@@ -17,8 +19,8 @@ module video_tpg #(
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  localparam [10:0]   SCRN_WIDTH = 1920;//1280; //1920
-  localparam [9:0]    SCRN_HEIGHT = 1080;//720;  //1080
+  localparam [12:0]   SCRN_WIDTH  = SCRW; //1280; //1920
+  localparam [12:0]   SCRN_HEIGHT = SCRH; //720;  //1080
 
   localparam [23:0]   GRN = 24'h0000FF;
   localparam [23:0]   RED = 24'h00FF00;
@@ -27,13 +29,10 @@ module video_tpg #(
   localparam [23:0]   SCRN_TOP = GRN;
   localparam [23:0]   SCRN_BOT = RED;
 
-
-  
-
   logic [DATAW-1:0]   tdata;
   logic               tvalid,tuser,tlast;
-  logic [10:0]        cntX_Horz;
-  logic [9:0]         cntY_Vert;
+  logic [12:0]        cntX_Horz;
+  logic [12:0]        cntY_Vert;
 
   typedef enum {
     TOP,BOT
@@ -88,18 +87,6 @@ module video_tpg #(
   assign m_axis_tid     = '0;
   assign m_axis_tdest   = '0;
 
-
-
-/*
-  always_ff @(posedge clk) begin 
-    case (VID_SM) 
-      TOP: 
-
-      BOT: 
-
-    endcase 
-  end 
-*/
 
 
 
