@@ -875,6 +875,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
      return 1
    }
     set_property -dict [list \
+    CONFIG.DATA_WIDTH {24} \
     CONFIG.SCREEN_HEIGHT {1080} \
     CONFIG.SCREEN_WIDTH {1920} \
   ] $video_tpg_wrapper_0

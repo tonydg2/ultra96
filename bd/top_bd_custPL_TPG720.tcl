@@ -870,7 +870,9 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
      catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
-  
+    set_property CONFIG.DATA_WIDTH {24} $video_tpg_wrapper_0
+
+
   # Create interface connections
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axil_reg32_0/S_AXI] [get_bd_intf_pins smartconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins smartconnect_0/M01_AXI] [get_bd_intf_pins v_tc_0/ctrl]
