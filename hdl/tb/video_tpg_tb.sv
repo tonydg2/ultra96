@@ -11,6 +11,7 @@
 module video_tpg_tb ;
 
   logic clk=0, rstn=0, rst,tready,en;
+  logic  [12:0] subh=0,addh=0,subw=0,addw=0;
 
   //always #2 clk = ~clk; // 250mhz period = 4ns, invert every 2ns
   always #5 clk = ~clk; // 100mhz 
@@ -48,6 +49,11 @@ module video_tpg_tb ;
     #40;tready <= 0;
     #10;tready <= 1;
 
+    subh <= 10;
+    #100;
+    addh <= 1;
+    #100;
+
 
   end
   assign rst = !rstn;
@@ -62,6 +68,10 @@ module video_tpg_tb ;
     .rst            (rst),
     .clk            (clk),
     .en             (en),
+    .subh           (subh),
+    .addh           (addh),
+    .subw           (subw),
+    .addw           (addw),
     .m_axis_tdata   (),
     .m_axis_tvalid  (),
     .m_axis_tready  (tready),

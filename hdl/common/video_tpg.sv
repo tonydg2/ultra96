@@ -7,6 +7,10 @@ module video_tpg #(
   input                   rst           ,
   input                   clk           ,
   input                   en            ,
+  input  [12:0]           subh          ,
+  input  [12:0]           addh          ,
+  input  [12:0]           subw          ,
+  input  [12:0]           addw          ,
   output [DATAW-1:0]      m_axis_tdata  ,
   output                  m_axis_tvalid ,
   input                   m_axis_tready ,
@@ -19,8 +23,11 @@ module video_tpg #(
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  localparam [12:0]   SCRN_WIDTH  = SCRW; //1280; //1920
-  localparam [12:0]   SCRN_HEIGHT = SCRH; //720;  //1080
+  logic [12:0]   SCRN_WIDTH ;// = SCRW + addw - subw; //1280; //1920
+  logic [12:0]   SCRN_HEIGHT;// = SCRH + addh - subh; //720;  //1080
+
+  assign SCRN_WIDTH  = SCRW + addw - subw;
+  assign SCRN_HEIGHT = SCRH + addh - subh;
 
   localparam [23:0]   GRN = 24'h0000FF;
   localparam [23:0]   RED = 24'h00FF00;
@@ -73,8 +80,8 @@ module video_tpg #(
   assign tdata = (cntY_Vert < (SCRN_HEIGHT/2)) ? SCRN_TOP:
                  (cntX_Horz < (SCRN_WIDTH/2)) ? SCRN_BOT:BLU;// left:rigth
   
-  assign tuser = ((cntX_Horz == '0) && (cntY_Vert == '0)) ? '1:'0;
-  assign tlast = (cntX_Horz == (SCRN_WIDTH - 1)) ? '1:'0;
+  assign tuser = ((cntX_Horz == '0) && (cntY_Vert == '0)) ? '1:'0;  // SOF
+  assign tlast = (cntX_Horz == (SCRN_WIDTH - 1)) ? '1:'0;           // EOL horiz width
 
 
 
@@ -87,7 +94,23 @@ module video_tpg #(
   assign m_axis_tid     = '0;
   assign m_axis_tdest   = '0;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+`ifndef QUESTA
+`ifndef MODELSIM
 
+(* dont_touch = "true" *) wire [12:0] screen_height;
+(* dont_touch = "true" *) wire [12:0] screen_width;
+assign screen_height = SCRN_HEIGHT;
+assign screen_width = SCRN_WIDTH;
 
+  ila1 ila1 (
+  	.clk(clk),
+  	.probe0(screen_height),
+  	.probe1(en),
+  	.probe2(screen_width)
+  );
+
+`endif
+`endif
 
 endmodule

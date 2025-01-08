@@ -22,6 +22,10 @@
     output [4:0] led_div1_o,
 
     output        vid_en,
+    output [12:0] subh,   
+    output [12:0] addh,   
+    output [12:0] subw,   
+    output [12:0] addw,   
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -716,6 +720,13 @@
   assign led_div1_o = slv_reg7[4:0];
 
   assign vid_en = slv_reg8[0]; //0x20
+
+  assign subh = slv_reg9[12:0];   // 0x24 
+  assign addh = slv_reg10[12:0];  // 0x28 
+  assign subw = slv_reg11[12:0];  // 0x2C 
+  assign addw = slv_reg12[12:0];  // 0x30 
+
+
 	// User logic ends
 
 	endmodule
