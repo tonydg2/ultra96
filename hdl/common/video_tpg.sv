@@ -95,6 +95,7 @@ module video_tpg #(
   assign m_axis_tdest   = '0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+/*
 `ifndef QUESTA
 `ifndef MODELSIM
 
@@ -112,5 +113,5 @@ assign screen_width = SCRN_WIDTH;
 
 `endif
 `endif
-
+*/
 endmodule
