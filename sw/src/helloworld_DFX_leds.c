@@ -40,6 +40,7 @@
 #define MIO_DIRM_1  0x244
 #define MIO_OEN_1   0x248
 
+#define PL_REG32_A_ADDR 0xa0010000
 
 static void powerOff(void);
 
@@ -50,14 +51,18 @@ int main()
     xil_printf("\n\rtesting adg2\n\r");
 
     versionCtrl0();
-
+    //int val;
+    //val = Xil_In32(PL_REG32_A_ADDR + 0x1C);
+    
+    
+    
     //int val = 11;
     //val = Xil_In32(0xa0010000);
     //Xil_Out32(0xa0010000,0x5);
     //xil_printf("Val = %d\n\r",val);
     //xil_printf("Val = %x\n\r",val);
-    s8 Ch;
     
+    s8 Ch;
     while (1) {
       Ch = inbyte();
       if (Ch == '\r') {
@@ -69,8 +74,11 @@ int main()
       if (Ch == '0') {
         xil_printf("\r\n POWER OFF");
         break;
+      } else if (Ch == 'a') {
+        Xil_Out32(PL_REG32_A_ADDR + 0x1C,0x0);
+      } else if (Ch == 'b') {
+        Xil_Out32(PL_REG32_A_ADDR + 0x1C,0x1);
       }
-
     }
     xil_printf("\n\r----------------------------------------\n\r");
     xil_printf("** END **\n\r");

@@ -1,6 +1,6 @@
 // Verilog wrapper
 
-module led_cnt_wrapper (
+module led_cnt_wrap (
   input         rst,
   input         clk100,
   input   [4:0] div_i,
@@ -9,12 +9,17 @@ module led_cnt_wrapper (
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  led_cnt led_cnt_inst (
+  led_cnt_pr_D led_cnt_pr_inst (
     .rst    (rst      ),
     .clk100 (clk100   ),
-    .div_i  (div_i    ),
-    .wren_i (wren_i   ),
     .led_o  (led_o    )
   );
 
 endmodule
+
+// blackbox definition
+//module led_cnt_pr_D (
+//  input   rst,
+//  input   clk100,
+//  output  led_o);
+//endmodule
