@@ -26,16 +26,25 @@ module led_cnt_tb ;
 //-------------------------------------------------------------------------------------------------
 //
 //-------------------------------------------------------------------------------------------------
-  led_cnt led_cnt(
-    .rst        (rst),
-    .clk100     (clk),
-    .div_i      (5'h1),
-    .wren_i     ('0),
-    .int_clr_i  ('0),
-    .int_cnt_o  (),
-    .led_o      (),
-    .led_int_o  ()
-  );
+//  led_cnt led_cnt(
+//    .rst        (rst),
+//    .clk100     (clk),
+//    .div_i      (5'h1),
+//    .wren_i     ('0),
+//    .int_clr_i  ('0),
+//    .int_cnt_o  (),
+//    .led_o      (),
+//    .led_int_o  ()
+//  );
+
+led_cnt_vhd08 led_cnt_vhd08_inst(
+  .rst        (rst),
+  .clk        (clk),
+  .div_i      (5'h1),
+  .wren_i     ('0),
+  .led_o      ()
+);
+
 
 
 endmodule
