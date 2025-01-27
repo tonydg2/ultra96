@@ -10,7 +10,7 @@
 
 module video_img_tb ;
 
-  logic clk=0, rstn=0, rst,tready,en;
+  logic clk=0, rstn=0, rst,tready,en,dbg=0;
   logic  [12:0] subh=0,addh=0,subw=0,addw=0;
 
   //always #2 clk = ~clk; // 250mhz period = 4ns, invert every 2ns
@@ -25,7 +25,10 @@ module video_img_tb ;
     #200;
     en <= 1;
     #200;
+    
     tready <= 1;
+    #7.49678ms;dbg<=1;
+
     #200;tready <= 0;
     #5;tready <= 1;
     #40;tready <= 0;
@@ -66,7 +69,7 @@ module video_img_tb ;
   logic [23 : 0] bram_data;
   logic bram_en;
 
-  video_img # (
+  video_img2 # (
     .DATAW      (24),
     .SCRW       (1920),
     .SCRH       (1080)

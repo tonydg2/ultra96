@@ -1,8 +1,8 @@
 
 module video_img #(
-  parameter integer DATAW = 32,
-  parameter integer SCRW  = 1280,
-  parameter integer SCRH  = 720
+  parameter integer DATAW = 24,
+  parameter integer SCRW  = 1920,
+  parameter integer SCRH  = 1080
 ) (
   input                   rst           ,
   input                   clk           ,

@@ -1,5 +1,5 @@
 
-module video_tpg #(
+module video_img2 #(
   parameter integer DATAW = 24,
   parameter integer SCRW  = 1920,
   parameter integer SCRH  = 1080
@@ -19,7 +19,10 @@ module video_tpg #(
   output [(DATAW/8)-1:0]  m_axis_tstrb  ,
   output [(DATAW/8)-1:0]  m_axis_tkeep  ,
   output                  m_axis_tid    ,
-  output                  m_axis_tdest
+  output                  m_axis_tdest  ,
+  output                  bram_en_o     ,
+  output [16 : 0]         bram_addr_o   ,
+  input  [23 : 0]         bram_data_i
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +35,12 @@ module video_tpg #(
   localparam [23:0]   GRN = 24'h0000FF;
   localparam [23:0]   RED = 24'h00FF00;
   localparam [23:0]   BLU = 24'hFF0000;
+  localparam [23:0]   BLK = 24'h010101;
+
+  localparam [12:0]   HorzMIN = 810;
+  localparam [12:0]   HorzMAX = 1110;
+  localparam [12:0]   VertMIN = 356;
+  localparam [12:0]   VertMAX = 726;
 
   localparam [23:0]   SCRN_TOP = GRN;
   localparam [23:0]   SCRN_BOT = RED;
@@ -41,15 +50,10 @@ module video_tpg #(
   logic [12:0]        cntX_Horz;
   logic [12:0]        cntY_Vert;
 
-  typedef enum {
-    TOP,BOT
-  } vid_sm_type;
-
-  vid_sm_type VID_SM;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//1280x720
-  // tdata 
+// Starting at 810 horiz, 356 vert -> size 300x370 use BRAM
+// else data is 0x010101
+// 111000 pixels
 
   always_ff @(posedge clk) begin 
     if (rst) begin 
@@ -76,14 +80,10 @@ module video_tpg #(
     end 
   end 
 
-  //assign tdata = (cntY_Vert > (SCRN_HEIGHT/2)) ? SCRN_BOT:SCRN_TOP; // works for top/bot
-  assign tdata = (cntY_Vert < (SCRN_HEIGHT/2)) ? SCRN_TOP:
-                 (cntX_Horz < (SCRN_WIDTH/2)) ? SCRN_BOT:BLU;// left:rigth
-  
+
+  assign tdata = (vdata_rom_active) ? rom_data:BLK;
   assign tuser = ((cntX_Horz == '0) && (cntY_Vert == '0)) ? '1:'0;  // SOF
   assign tlast = (cntX_Horz == (SCRN_WIDTH - 1)) ? '1:'0;           // EOL horiz width
-
-
 
   assign m_axis_tdata   = tdata;
   assign m_axis_tvalid  = tvalid;
@@ -94,7 +94,37 @@ module video_tpg #(
   assign m_axis_tid     = '0;
   assign m_axis_tdest   = '0;
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+  //bram_en_o
+  //bram_addr_o [16 : 0]  
+  //bram_data_i [23 : 0]
+
+  logic          rom_rd_en  ;  
+  logic [16 : 0] rom_addr   ;
+  logic [23 : 0] rom_data   ;
+
+  logic vdata_rom_active;
+  assign vdata_rom_active = ((((cntY_Vert >= VertMIN) && (cntY_Vert < VertMAX)) && 
+                              ((cntX_Horz >= HorzMIN) && (cntX_Horz < HorzMAX)))) ? 1:0;
+
+  always_ff @(posedge clk) begin 
+    if ((tuser == 1) || (rst == 1)) begin 
+      rom_addr <= 0;
+    end else if (rom_addr ==(111000-1)) begin 
+      rom_addr <= 0;
+    end else if ((rom_rd_en == 1)) begin
+      rom_addr <= rom_addr + 1;
+    end 
+  end
+
+  assign rom_rd_en = ((rom_addr == 0) || (vdata_rom_active && m_axis_tready)) ? 1:0;
+  assign rom_data = bram_data_i;
+  assign bram_addr_o = rom_addr;
+  assign bram_en_o = rom_rd_en;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 `ifndef QUESTA
 `ifndef MODELSIM

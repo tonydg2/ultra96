@@ -1,5 +1,5 @@
 
-module video_img_wrapper #(
+module video_img2_wrapper #(
   parameter integer DATA_WIDTH    = 24,
   parameter integer SCREEN_WIDTH  = 1920,
   parameter integer SCREEN_HEIGHT = 1080
@@ -26,11 +26,11 @@ module video_img_wrapper #(
   wire [23 : 0] bram_data;
 
 
-  video_img # (
+  video_img2 # (
     .DATAW      (DATA_WIDTH     ),
     .SCRW       (SCREEN_WIDTH   ),
     .SCRH       (SCREEN_HEIGHT  )
-  ) video_img_inst (
+  ) video_img2_inst (
     .rst            (rst           ),
     .clk            (clk           ),
     .subh           (subh          ),

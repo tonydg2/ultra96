@@ -1,8 +1,8 @@
 
 module video_tpg_wrapper #(
-  parameter integer DATA_WIDTH    = 32,
-  parameter integer SCREEN_WIDTH  = 1280,
-  parameter integer SCREEN_HEIGHT = 720
+  parameter integer DATA_WIDTH    = 24,
+  parameter integer SCREEN_WIDTH  = 1920,
+  parameter integer SCREEN_HEIGHT = 1080
 ) (
   input                       rst           ,
   input                       clk           ,
