@@ -46,7 +46,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# axil_reg32, led_cnt_wrapper, user_init_64b_wrapper_zynq, video_tpg_wrapper, video_img_wrapper, video_img2_wrapper, axis_switch_simple_wrapper
+# axil_reg32, led_cnt_wrapper, user_init_64b_wrapper_zynq
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -140,9 +140,6 @@ xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:zynq_ultra_ps_e:3.5\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:clk_wiz:6.0\
-xilinx.com:ip:v_axi4s_vid_out:4.0\
-xilinx.com:ip:v_tc:6.2\
-xilinx.com:ip:xlconstant:1.1\
 "
 
    set list_ips_missing ""
@@ -171,10 +168,6 @@ if { $bCheckModules == 1 } {
 axil_reg32\
 led_cnt_wrapper\
 user_init_64b_wrapper_zynq\
-video_tpg_wrapper\
-video_img_wrapper\
-video_img2_wrapper\
-axis_switch_simple_wrapper\
 "
 
    set list_mods_missing ""
@@ -243,6 +236,10 @@ proc create_root_design { parentCell } {
   set clk100 [ create_bd_port -dir O -type clk clk100 ]
   set rstn [ create_bd_port -dir O -type rst rstn ]
   set led_div1_o [ create_bd_port -dir O -from 4 -to 0 led_div1_o ]
+  set locked [ create_bd_port -dir O locked ]
+  set clk_400 [ create_bd_port -dir O -type clk clk_400 ]
+  set clk_200 [ create_bd_port -dir O -type clk clk_200 ]
+  set clk_600 [ create_bd_port -dir O -type clk clk_600 ]
 
   # Create instance: axil_reg32_0, and set properties
   set block_name axil_reg32
@@ -791,175 +788,74 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
     CONFIG.PSU__USE__M_AXI_GP0 {1} \
     CONFIG.PSU__USE__M_AXI_GP1 {1} \
     CONFIG.PSU__USE__M_AXI_GP2 {0} \
-    CONFIG.PSU__USE__VIDEO {1} \
+    CONFIG.PSU__USE__VIDEO {0} \
   ] $zynq_ultra_ps_e_0
 
 
   # Create instance: smartconnect_0, and set properties
   set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
   set_property -dict [list \
-    CONFIG.NUM_MI {2} \
+    CONFIG.NUM_MI {1} \
     CONFIG.NUM_SI {2} \
   ] $smartconnect_0
 
-
-  # Create instance: clk_wiz_0, and set properties
-  set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0 ]
-  set_property -dict [list \
-    CONFIG.CLKOUT1_JITTER {153.105} \
-    CONFIG.CLKOUT1_PHASE_ERROR {257.433} \
-    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {74.250} \
-    CONFIG.CLKOUT2_JITTER {139.971} \
-    CONFIG.CLKOUT2_PHASE_ERROR {257.433} \
-    CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {148.50} \
-    CONFIG.CLKOUT2_USED {true} \
-    CONFIG.CLK_OUT1_PORT {clk_74p25} \
-    CONFIG.CLK_OUT2_PORT {clk_148p5} \
-    CONFIG.MMCM_CLKFBOUT_MULT_F {74.250} \
-    CONFIG.MMCM_CLKOUT0_DIVIDE_F {20.000} \
-    CONFIG.MMCM_CLKOUT1_DIVIDE {10} \
-    CONFIG.MMCM_DIVCLK_DIVIDE {5} \
-    CONFIG.NUM_OUT_CLKS {2} \
-    CONFIG.USE_RESET {false} \
-  ] $clk_wiz_0
-
-
-  # Create instance: v_axi4s_vid_out_0, and set properties
-  set v_axi4s_vid_out_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_axi4s_vid_out:4.0 v_axi4s_vid_out_0 ]
-  set_property -dict [list \
-    CONFIG.C_ADDR_WIDTH {13} \
-    CONFIG.C_HAS_ASYNC_CLK {1} \
-    CONFIG.C_HYSTERESIS_LEVEL {20} \
-    CONFIG.C_NATIVE_COMPONENT_WIDTH {12} \
-  ] $v_axi4s_vid_out_0
-
-
-  # Create instance: v_tc_0, and set properties
-  set v_tc_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:v_tc:6.2 v_tc_0 ]
-  set_property -dict [list \
-    CONFIG.VIDEO_MODE {1080p} \
-    CONFIG.enable_detection {false} \
-  ] $v_tc_0
-
-
-  # Create instance: proc_sys_reset_1, and set properties
-  set proc_sys_reset_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_1 ]
-
-  # Create instance: const_1b1, and set properties
-  set const_1b1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 const_1b1 ]
 
   # Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
   set_property -dict [list \
     CONFIG.CLKOUT1_JITTER {102.086} \
+    CONFIG.CLKOUT1_PHASE_ERROR {87.180} \
     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {200.0} \
+    CONFIG.CLKOUT2_JITTER {90.074} \
+    CONFIG.CLKOUT2_PHASE_ERROR {87.180} \
+    CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {400} \
+    CONFIG.CLKOUT2_USED {true} \
+    CONFIG.CLKOUT3_JITTER {83.768} \
+    CONFIG.CLKOUT3_PHASE_ERROR {87.180} \
+    CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {600} \
+    CONFIG.CLKOUT3_USED {true} \
+    CONFIG.CLKOUT4_JITTER {83.768} \
+    CONFIG.CLKOUT4_PHASE_ERROR {87.180} \
+    CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {100.000} \
+    CONFIG.CLKOUT4_USED {false} \
     CONFIG.CLK_OUT1_PORT {clk_200} \
+    CONFIG.CLK_OUT2_PORT {clk_400} \
+    CONFIG.CLK_OUT3_PORT {clk_600} \
+    CONFIG.MMCM_CLKFBOUT_MULT_F {12.000} \
+    CONFIG.MMCM_CLKIN1_PERIOD {10.000} \
+    CONFIG.MMCM_CLKIN2_PERIOD {10.000} \
     CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.000} \
+    CONFIG.MMCM_CLKOUT1_DIVIDE {3} \
+    CONFIG.MMCM_CLKOUT2_DIVIDE {2} \
+    CONFIG.MMCM_CLKOUT3_DIVIDE {1} \
+    CONFIG.NUM_OUT_CLKS {3} \
     CONFIG.USE_RESET {false} \
   ] $clk_wiz_1
 
 
-  # Create instance: proc_sys_reset_2, and set properties
-  set proc_sys_reset_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_2 ]
-
-  # Create instance: xlconstant_0, and set properties
-  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
-  set_property -dict [list \
-    CONFIG.CONST_VAL {0} \
-    CONFIG.CONST_WIDTH {13} \
-  ] $xlconstant_0
-
-
-  # Create instance: video_tpg_wrapper_0, and set properties
-  set block_name video_tpg_wrapper
-  set block_cell_name video_tpg_wrapper_0
-  if { [catch {set video_tpg_wrapper_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $video_tpg_wrapper_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
-  # Create instance: video_img_wrapper_0, and set properties
-  set block_name video_img_wrapper
-  set block_cell_name video_img_wrapper_0
-  if { [catch {set video_img_wrapper_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $video_img_wrapper_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
-  # Create instance: video_img2_wrapper_0, and set properties
-  set block_name video_img2_wrapper
-  set block_cell_name video_img2_wrapper_0
-  if { [catch {set video_img2_wrapper_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $video_img2_wrapper_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
-  # Create instance: axis_switch_simple_w_0, and set properties
-  set block_name axis_switch_simple_wrapper
-  set block_cell_name axis_switch_simple_w_0
-  if { [catch {set axis_switch_simple_w_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $axis_switch_simple_w_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
   # Create interface connections
-  connect_bd_intf_net -intf_net axis_switch_simple_w_0_m_axis [get_bd_intf_pins axis_switch_simple_w_0/m_axis] [get_bd_intf_pins v_axi4s_vid_out_0/video_in]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axil_reg32_0/S_AXI] [get_bd_intf_pins smartconnect_0/M00_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins smartconnect_0/M01_AXI] [get_bd_intf_pins v_tc_0/ctrl]
-  connect_bd_intf_net -intf_net video_img2_wrapper_0_m_axis [get_bd_intf_pins axis_switch_simple_w_0/s2_axis] [get_bd_intf_pins video_img2_wrapper_0/m_axis]
-  connect_bd_intf_net -intf_net video_img_wrapper_0_m_axis [get_bd_intf_pins axis_switch_simple_w_0/s1_axis] [get_bd_intf_pins video_img_wrapper_0/m_axis]
-  connect_bd_intf_net -intf_net video_tpg_wrapper_0_m_axis [get_bd_intf_pins axis_switch_simple_w_0/s0_axis] [get_bd_intf_pins video_tpg_wrapper_0/m_axis]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD] [get_bd_intf_pins smartconnect_0/S00_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM1_FPD [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM1_FPD] [get_bd_intf_pins smartconnect_0/S01_AXI]
 
   # Create port connections
   connect_bd_net -net axil_reg32_0_led_div0_o [get_bd_pins axil_reg32_0/led_div0_o] [get_bd_pins led_cnt_wrapper_0/div_i]
   connect_bd_net -net axil_reg32_0_led_div1_o [get_bd_pins axil_reg32_0/led_div1_o] [get_bd_ports led_div1_o]
-  connect_bd_net -net axil_reg32_0_vid0_en [get_bd_pins axil_reg32_0/vid0_en] [get_bd_pins video_tpg_wrapper_0/en] [get_bd_pins axis_switch_simple_w_0/s0_en]
-  connect_bd_net -net axil_reg32_0_vid1_en [get_bd_pins axil_reg32_0/vid1_en] [get_bd_pins video_img_wrapper_0/en] [get_bd_pins axis_switch_simple_w_0/s1_en]
-  connect_bd_net -net axil_reg32_0_vid2_en [get_bd_pins axil_reg32_0/vid2_en] [get_bd_pins video_img2_wrapper_0/en] [get_bd_pins axis_switch_simple_w_0/s2_en]
-  connect_bd_net -net clk_wiz_0_clk_74p25 [get_bd_pins clk_wiz_0/clk_148p5] [get_bd_pins zynq_ultra_ps_e_0/dp_video_in_clk] [get_bd_pins proc_sys_reset_1/slowest_sync_clk] [get_bd_pins v_tc_0/clk] [get_bd_pins v_axi4s_vid_out_0/vid_io_out_clk]
-  connect_bd_net -net clk_wiz_1_clk_200 [get_bd_pins clk_wiz_1/clk_200] [get_bd_pins proc_sys_reset_2/slowest_sync_clk] [get_bd_pins v_axi4s_vid_out_0/aclk] [get_bd_pins video_tpg_wrapper_0/clk] [get_bd_pins video_img_wrapper_0/clk] [get_bd_pins video_img2_wrapper_0/clk] [get_bd_pins axis_switch_simple_w_0/aclk]
-  connect_bd_net -net const_1b1_dout [get_bd_pins const_1b1/dout] [get_bd_pins v_tc_0/clken] [get_bd_pins v_tc_0/s_axi_aclken] [get_bd_pins v_axi4s_vid_out_0/aclken] [get_bd_pins v_axi4s_vid_out_0/vid_io_out_ce]
+  connect_bd_net -net clk_wiz_1_clk_200 [get_bd_pins clk_wiz_1/clk_200] [get_bd_ports clk_200]
+  connect_bd_net -net clk_wiz_1_clk_400 [get_bd_pins clk_wiz_1/clk_400] [get_bd_ports clk_400]
+  connect_bd_net -net clk_wiz_1_clk_600 [get_bd_pins clk_wiz_1/clk_600] [get_bd_ports clk_600]
+  connect_bd_net -net clk_wiz_1_locked [get_bd_pins clk_wiz_1/locked] [get_bd_ports locked]
   connect_bd_net -net led_cnt_wrapper_0_led_o [get_bd_pins led_cnt_wrapper_0/led_o] [get_bd_ports led_o]
-  connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn] [get_bd_pins v_tc_0/s_axi_aresetn]
+  connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins smartconnect_0/aresetn]
   connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axil_reg32_0/S_AXI_ARESETN]
   connect_bd_net -net proc_sys_reset_0_peripheral_reset [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins led_cnt_wrapper_0/rst]
-  connect_bd_net -net proc_sys_reset_1_peripheral_aresetn [get_bd_pins proc_sys_reset_1/peripheral_aresetn] [get_bd_pins v_tc_0/resetn]
-  connect_bd_net -net proc_sys_reset_1_peripheral_reset [get_bd_pins proc_sys_reset_1/peripheral_reset] [get_bd_pins v_axi4s_vid_out_0/vid_io_out_reset]
-  connect_bd_net -net proc_sys_reset_2_peripheral_aresetn [get_bd_pins proc_sys_reset_2/peripheral_aresetn] [get_bd_pins v_axi4s_vid_out_0/aresetn]
-  connect_bd_net -net proc_sys_reset_2_peripheral_reset [get_bd_pins proc_sys_reset_2/peripheral_reset] [get_bd_pins video_tpg_wrapper_0/rst] [get_bd_pins video_img_wrapper_0/rst] [get_bd_pins video_img2_wrapper_0/rst]
   connect_bd_net -net user_init_64b_wrappe_0_usr_access_data_o [get_bd_pins user_init_64b_wrappe_0/usr_access_data_o] [get_bd_pins axil_reg32_0/timestamp]
   connect_bd_net -net user_init_64b_wrappe_0_value_o [get_bd_pins user_init_64b_wrappe_0/value_o] [get_bd_pins axil_reg32_0/git_hash]
-  connect_bd_net -net v_axi4s_vid_out_0_vid_active_video [get_bd_pins v_axi4s_vid_out_0/vid_active_video] [get_bd_pins zynq_ultra_ps_e_0/dp_live_video_in_de]
-  connect_bd_net -net v_axi4s_vid_out_0_vid_data [get_bd_pins v_axi4s_vid_out_0/vid_data] [get_bd_pins zynq_ultra_ps_e_0/dp_live_video_in_pixel1]
-  connect_bd_net -net v_axi4s_vid_out_0_vid_hsync [get_bd_pins v_axi4s_vid_out_0/vid_hsync] [get_bd_pins zynq_ultra_ps_e_0/dp_live_video_in_hsync]
-  connect_bd_net -net v_axi4s_vid_out_0_vid_vsync [get_bd_pins v_axi4s_vid_out_0/vid_vsync] [get_bd_pins zynq_ultra_ps_e_0/dp_live_video_in_vsync]
-  connect_bd_net -net v_axi4s_vid_out_0_vtg_ce [get_bd_pins v_axi4s_vid_out_0/vtg_ce] [get_bd_pins v_tc_0/gen_clken]
-  connect_bd_net -net v_tc_0_active_video_out [get_bd_pins v_tc_0/active_video_out] [get_bd_pins v_axi4s_vid_out_0/vtg_active_video]
-  connect_bd_net -net v_tc_0_hblank_out [get_bd_pins v_tc_0/hblank_out] [get_bd_pins v_axi4s_vid_out_0/vtg_hblank]
-  connect_bd_net -net v_tc_0_hsync_out [get_bd_pins v_tc_0/hsync_out] [get_bd_pins v_axi4s_vid_out_0/vtg_hsync]
-  connect_bd_net -net v_tc_0_vblank_out [get_bd_pins v_tc_0/vblank_out] [get_bd_pins v_axi4s_vid_out_0/vtg_vblank]
-  connect_bd_net -net v_tc_0_vsync_out [get_bd_pins v_tc_0/vsync_out] [get_bd_pins v_axi4s_vid_out_0/vtg_vsync]
-  connect_bd_net -net xlconstant_0_dout [get_bd_pins xlconstant_0/dout] [get_bd_pins video_tpg_wrapper_0/subh] [get_bd_pins video_tpg_wrapper_0/addh] [get_bd_pins video_tpg_wrapper_0/subw] [get_bd_pins video_tpg_wrapper_0/addw] [get_bd_pins video_img_wrapper_0/subh] [get_bd_pins video_img_wrapper_0/addh] [get_bd_pins video_img_wrapper_0/subw] [get_bd_pins video_img_wrapper_0/addw] [get_bd_pins video_img2_wrapper_0/subh] [get_bd_pins video_img2_wrapper_0/addh] [get_bd_pins video_img2_wrapper_0/subw] [get_bd_pins video_img2_wrapper_0/addw]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins led_cnt_wrapper_0/clk100] [get_bd_pins clk_wiz_0/clk_in1] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk] [get_bd_pins v_tc_0/s_axi_aclk] [get_bd_pins clk_wiz_1/clk_in1] [get_bd_pins axil_reg32_0/S_AXI_ACLK]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn] [get_bd_pins proc_sys_reset_1/ext_reset_in] [get_bd_pins proc_sys_reset_2/ext_reset_in]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins smartconnect_0/aclk] [get_bd_ports clk100] [get_bd_pins led_cnt_wrapper_0/clk100] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk] [get_bd_pins clk_wiz_1/clk_in1] [get_bd_pins axil_reg32_0/S_AXI_ACLK]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_ports rstn]
 
   # Create address segments
   assign_bd_address -offset 0xB0000000 -range 0x00000080 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axil_reg32_0/S_AXI/reg0] -force
-  assign_bd_address -offset 0xA0000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs v_tc_0/ctrl/Reg] -force
 
 
   # Restore current instance

@@ -1,4 +1,26 @@
 #--------------------------------------------------------------------------------------------------
+#---------                                                    
+# BANK 65                                                     
+#---------                                                    
+set_property PACKAGE_PIN M1 [get_ports {HD_N[1]  }];#  CSI0_D1_N     H_D1_N  
+set_property PACKAGE_PIN M2 [get_ports {HD_P[1]  }];#  CSI0_D1_P     H_D1_P  
+set_property PACKAGE_PIN N4 [get_ports {HD_N[0]  }];#  CSI0_D0_N     H_D0_N  
+set_property PACKAGE_PIN N5 [get_ports {HD_P[0]  }];#  CSI0_D0_P     H_D0_P  
+set_property PACKAGE_PIN P1 [get_ports {H_CLK_N }];#  CSI0_C_N      H_CLK_N 
+set_property PACKAGE_PIN N2 [get_ports {H_CLK_P }];#  CSI0_C_P      H_CLK_P 
+set_property PACKAGE_PIN L1 [get_ports {HD_N[3]  }];#  CSI0_D3_N     H_D3_N  
+set_property PACKAGE_PIN L2 [get_ports {HD_P[3]  }];#  CSI0_D3_P     H_D3_P  
+set_property PACKAGE_PIN M4 [get_ports {HD_N[2]  }];#  CSI0_D2_N     H_D2_N  
+set_property PACKAGE_PIN M5 [get_ports {HD_P[2]  }];#  CSI0_D2_P     H_D2_P  
+##---------                                                   
+## BANK 26                                                    
+##---------                                                   
+set_property PACKAGE_PIN A6 [get_ports {ICP3_I2C_ID }];#  HD_GPIO_6  
+set_property PACKAGE_PIN A7 [get_ports {ISP_TRG_IN  }];#  HD_GPIO_7  
+set_property PACKAGE_PIN E8 [get_ports {H_CLOCK     }];#  CSI0_MCLK  
+set_property PACKAGE_PIN G6 [get_ports {96B_SP3     }];#  HD_GPIO_8  
+
+
 
 #--------------------------------------------------------------------------------------------------
 #set_property BITSTREAM.CONFIG.USR_ACCESS TIMESTAMP [current_design]
@@ -88,3 +110,10 @@ set_property PACKAGE_PIN B9 [get_ports {RADIO_LED[1]    }];#  D10 = BLUE
 set_property IOSTANDARD LVCMOS18 [get_ports -of_objects [get_iobanks 26]];
 set_property IOSTANDARD LVCMOS12 [get_ports -of_objects [get_iobanks 65]];
 set_property IOSTANDARD LVCMOS12 [get_ports -of_objects [get_iobanks 66]];
+
+#--------------
+set_property IOSTANDARD LVDS [get_ports {HD_N[*]  }];
+set_property IOSTANDARD LVDS [get_ports {HD_P[*]  }];
+
+set_property IOSTANDARD LVDS [get_ports {H_CLK_N }];
+set_property IOSTANDARD LVDS [get_ports {H_CLK_P }];
