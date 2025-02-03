@@ -1,5 +1,5 @@
 set ipDir "../ip"
-set modName "ila1"
+set modName "ila2"
 
 if {![file exists $ipDir]} {error "ip directory not present"}
 
