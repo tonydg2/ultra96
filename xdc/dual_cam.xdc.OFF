@@ -25,7 +25,7 @@
 # SENS1_GPIO3   23      - MIO36_            - 
 # RST           25      - MIO39_            - 
 # H_STBY        27      - MIO44_            - 
-# ICP3_I2C_ID   29      - HD_GPIO_6         - IO
+# ICP3_I2C_ID   29      - HD_GPIO_6         - IO    {IO_L12N_AD0N_26}
 # ISP_TRG_IN    31      - HD_GPIO_7         - IO
 # 96B_SP3       33      - HD_GPIO_8         - 
 # 96B_SP2       24      - MIO37_            - 
