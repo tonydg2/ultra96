@@ -1,10 +1,16 @@
 module top_io (
-    output [1:0]    RADIO_LED ,   // 1=BLUE, 0=Yellow
-    input           H_CLOCK   ,
-    input  [3:0]    HD_N      ,
-    input  [3:0]    HD_P      ,
-    input           H_CLK_N   , 
-    input           H_CLK_P    
+    output [1:0]    RADIO_LED           ,   // 1=BLUE, 0=Yellow
+    output          H_CLOCK             ,
+    output          ICP3_I2C_ID         , 
+    output          SP3_96B             ,
+    input           mipi_phy_if_clk_n   ,
+    input           mipi_phy_if_clk_p   ,
+    input   [3:0]   mipi_phy_if_data_n  ,
+    input   [3:0]   mipi_phy_if_data_p  
+//    input  [3:0]    HD_N      ,
+//    input  [3:0]    HD_P      ,
+//    input           H_CLK_N   , 
+//    input           H_CLK_P    
 );
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -15,14 +21,22 @@ module top_io (
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   top_bd_wrapper top_bd_wrapper_inst (
-    .clk100       (clk100           ),
-    .clk_200      (clk200           ),
-    .clk_400      (clk400           ),
-    .clk_600      (clk600           ),
-    .locked       (mmcm_lock        ),
-    .rstn         (rstn             ),
-    .led_div1_o   (led_div1         ),
-    .led_o        (RADIO_LED[0]     )//Yellow
+    .clk100             (clk100             ),
+    .clk_48             (H_CLOCK            ),
+    .clk_200            (clk200             ),
+    .clk_400            (clk400             ),
+    .clk_600            (clk600             ),
+    .ICP3_I2C_ID_SELECT (ICP3_I2C_ID        ),
+    .SP3                (SP3_96B            ),
+    .TRG_INPUT          (ISP_TRG_IN         ),
+    .mipi_phy_if_clk_n  (mipi_phy_if_clk_n  ),
+    .mipi_phy_if_clk_p  (mipi_phy_if_clk_p  ),
+    .mipi_phy_if_data_n (mipi_phy_if_data_n ),
+    .mipi_phy_if_data_p (mipi_phy_if_data_p ),
+    .locked             (mmcm_lock          ),
+    .rstn               (rstn               ),
+    .led_div1_o         (led_div1           ),
+    .led_o              (RADIO_LED[0]       )//Yellow
   );
 
   led_cnt led_cnt_inst (
@@ -35,40 +49,40 @@ module top_io (
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  genvar i;
-  generate
-    for (i = 0; i < 4; i = i + 1) begin : ibufds_loop
-      IBUFDS ibufds_inst (
-        .I  (HD_P[i]  ),  // Positive input for instance i
-        .IB (HD_N[i]  ),  // Negative input for instance i
-        .O  (hdata[i] )   // Output for instance i
-      );
-    end
-  endgenerate
-
-  IBUFDS ibufds_H_CLK (
-    .I  (H_CLK_P  ),  // Positive input for instance i
-    .IB (H_CLK_N  ),  // Negative input for instance i
-    .O  (hclk     )   // Output for instance i
-  );
-
-  IBUF IBUF_H_CLOCK (
-    .I(H_CLOCK      ), // 1-bit input: Buffer input
-    .O(hclock_bufg  )  // 1-bit output: Buffer output
-  );
-
-  BUFG BUFG_inst (
-    .I(hclock_bufg),  // 1-bit input: Clock input.
-    .O(hclock)   // 1-bit output: Clock output.
-  );
+//  genvar i;
+//  generate
+//    for (i = 0; i < 4; i = i + 1) begin : ibufds_loop
+//      IBUFDS ibufds_inst (
+//        .I  (HD_P[i]  ),  // Positive input for instance i
+//        .IB (HD_N[i]  ),  // Negative input for instance i
+//        .O  (hdata[i] )   // Output for instance i
+//      );
+//    end
+//  endgenerate
+//
+//  IBUFDS ibufds_H_CLK (
+//    .I  (H_CLK_P  ),  // Positive input for instance i
+//    .IB (H_CLK_N  ),  // Negative input for instance i
+//    .O  (hclk     )   // Output for instance i
+//  );
+//
+//  IBUF IBUF_H_CLOCK (
+//    .I(H_CLOCK      ), // 1-bit input: Buffer input
+//    .O(hclock_bufg  )  // 1-bit output: Buffer output
+//  );
+//
+//  BUFG BUFG_inst (
+//    .I(hclock_bufg),  // 1-bit input: Clock input.
+//    .O(hclock)   // 1-bit output: Clock output.
+//  );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ila1 ila1 (
-  	.clk    (clk200),
-  	.probe0 (hdata),
-  	.probe1 (hclock),
-  	.probe2 (hclk)
-  );
+//  ila1 ila1 (
+//  	.clk    (clk200),
+//  	.probe0 (hdata),
+//  	.probe1 (hclock),
+//  	.probe2 (hclk)
+//  );
 
 
 endmodule

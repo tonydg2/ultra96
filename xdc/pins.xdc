@@ -20,7 +20,7 @@
 set_property PACKAGE_PIN A6 [get_ports {ICP3_I2C_ID }];#  HD_GPIO_6             # ICP3_I2C_ID_SELECT
 set_property PACKAGE_PIN A7 [get_ports {ISP_TRG_IN  }];#  HD_GPIO_7             # TRG_INPUT
 set_property PACKAGE_PIN E8 [get_ports {H_CLOCK     }];#  CSI0_MCLK             # CLK48M
-set_property PACKAGE_PIN G6 [get_ports {96B_SP3     }];#  HD_GPIO_8             # SP3
+set_property PACKAGE_PIN G6 [get_ports {SP3_96B     }];#  HD_GPIO_8             # SP3
 
 
 
@@ -114,8 +114,16 @@ set_property IOSTANDARD LVCMOS12 [get_ports -of_objects [get_iobanks 65]];
 set_property IOSTANDARD LVCMOS12 [get_ports -of_objects [get_iobanks 66]];
 
 #--------------
-set_property IOSTANDARD LVDS [get_ports {HD_N[*]  }];
-set_property IOSTANDARD LVDS [get_ports {HD_P[*]  }];
+#set_property IOSTANDARD LVDS [get_ports {HD_N[*]  }];
+#set_property IOSTANDARD LVDS [get_ports {HD_P[*]  }];
+#set_property IOSTANDARD LVDS [get_ports {H_CLK_N }];
+#set_property IOSTANDARD LVDS [get_ports {H_CLK_P }];
 
-set_property IOSTANDARD LVDS [get_ports {H_CLK_N }];
-set_property IOSTANDARD LVDS [get_ports {H_CLK_P }];
+set_property IOSTANDARD MIPI_DPHY_DCI [get_ports {mipi_phy_if_data_n[*]  }];
+set_property IOSTANDARD MIPI_DPHY_DCI [get_ports {mipi_phy_if_data_p[*]  }];
+set_property IOSTANDARD MIPI_DPHY_DCI [get_ports {mipi_phy_if_clk_n }];
+set_property IOSTANDARD MIPI_DPHY_DCI [get_ports {mipi_phy_if_clk_p }];
+
+
+
+
