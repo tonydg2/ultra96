@@ -1,0 +1,60 @@
+
+module axis_switch_gen_wrapper #
+(
+  parameter integer DATAW	= 24,
+  parameter integer NUM_SLAVES = 3
+
+)
+(
+  input aclk,
+
+  input  [NUM_SLAVES-1:0]                   s_en            ,
+  input  [NUM_SLAVES-1:0][DATAW-1:0]        s_axis_tdata    ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tvalid   ,
+  output [NUM_SLAVES-1:0]                   s_axis_tready   ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tuser    ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tlast    ,
+  input  [NUM_SLAVES-1:0][(DATAW/8)-1:0]    s_axis_tstrb    ,
+  input  [NUM_SLAVES-1:0][(DATAW/8)-1:0]    s_axis_tkeep    ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tid      ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tdest    ,
+
+  output [DATAW-1:0]                        m_axis_tdata   ,
+  output                                    m_axis_tvalid  ,
+  input                                     m_axis_tready  ,
+  output                                    m_axis_tuser   ,
+  output                                    m_axis_tlast   ,
+  output [(DATAW/8)-1:0]                    m_axis_tstrb   ,
+  output [(DATAW/8)-1:0]                    m_axis_tkeep   ,
+  output                                    m_axis_tid     ,
+  output                                    m_axis_tdest 
+);
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+  axis_switch_gen # (
+    .DATAW      (DATAW      ),
+    .NUM_SLAVES (NUM_SLAVES )
+  ) axis_switch_gen_inst (
+    .s_en           (s_en           ),
+    .s_axis_tdata   (s_axis_tdata   ),
+    .s_axis_tvalid  (s_axis_tvalid  ),
+    .s_axis_tready  (s_axis_tready  ),
+    .s_axis_tuser   (s_axis_tuser   ),
+    .s_axis_tlast   (s_axis_tlast   ),
+    .s_axis_tstrb   (s_axis_tstrb   ),
+    .s_axis_tkeep   (s_axis_tkeep   ),
+    .s_axis_tid     (s_axis_tid     ),
+    .s_axis_tdest   (s_axis_tdest   ),
+    .m_axis_tdata   (m_axis_tdata   ),
+    .m_axis_tvalid  (m_axis_tvalid  ),
+    .m_axis_tready  (m_axis_tready  ),
+    .m_axis_tuser   (m_axis_tuser   ),
+    .m_axis_tlast   (m_axis_tlast   ),
+    .m_axis_tstrb   (m_axis_tstrb   ),
+    .m_axis_tkeep   (m_axis_tkeep   ),
+    .m_axis_tid     (m_axis_tid     ),
+    .m_axis_tdest   (m_axis_tdest   )
+);
+
+
+endmodule

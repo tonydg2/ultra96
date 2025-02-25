@@ -21,14 +21,25 @@
     output [4:0] led_div0_o,
     output [4:0] led_div1_o,
 
-    output        vid0_en,
-    output        vid1_en,
-    output        vid2_en,
-    
-    output [12:0] subh,   
-    output [12:0] addh,   
-    output [12:0] subw,   
-    output [12:0] addw,   
+    //output        vid0_en,
+    //output        vid1_en,
+    //output        vid2_en,
+    //
+    //output [12:0] subh,   
+    //output [12:0] addh,   
+    //output [12:0] subw,   
+    //output [12:0] addw,   
+
+    output m0_en_0  , 
+    output m1_en_0  ,
+    output m0_en_1  ,
+    output m1_en_1  ,
+    output s0_en_1  ,
+    output s1_en_1  , 
+    output s0_en_2  ,
+    output s1_en_2  ,
+
+
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -723,14 +734,26 @@
   assign led_div1_o = slv_reg7[4:0];
 
 
-  assign subh = slv_reg9[12:0];   // 0x24 
-  assign addh = slv_reg10[12:0];  // 0x28 
-  assign subw = slv_reg11[12:0];  // 0x2C 
-  assign addw = slv_reg12[12:0];  // 0x30 
+  //assign subh = slv_reg9[12:0];   // 0x24 
+  //assign addh = slv_reg10[12:0];  // 0x28 
+  //assign subw = slv_reg11[12:0];  // 0x2C 
+  //assign addw = slv_reg12[12:0];  // 0x30 
 
-  assign vid0_en = slv_reg13[0]; //0x34
-  assign vid1_en = slv_reg14[0]; //0x38
-  assign vid2_en = slv_reg15[0]; //0x3C
+  //assign vid0_en = slv_reg13[0]; //0x34
+  //assign vid1_en = slv_reg14[0]; //0x38
+  //assign vid2_en = slv_reg15[0]; //0x3C
+
+  assign m0_en_0  = slv_reg9[0];  // 0x24
+  assign m1_en_0  = slv_reg10[0]; // 0x28
+
+  assign m0_en_1  = slv_reg11[0]; // 0x2C
+  assign m1_en_1  = slv_reg12[0]; // 0x30
+  assign s0_en_1  = slv_reg13[0]; // 0x34
+  assign s1_en_1  = slv_reg14[0]; // 0x38
+  
+  assign s0_en_2  = slv_reg15[0]; // 0x3C
+  assign s1_en_2  = slv_reg16[0]; // 0x40
+
 
 
 	// User logic ends

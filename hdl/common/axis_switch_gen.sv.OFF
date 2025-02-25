@@ -1,0 +1,47 @@
+module axis_switch_gen #(
+  parameter integer DATAW = 24,
+  parameter integer NUM_SLAVES = 3
+)(
+  input  [NUM_SLAVES-1:0]                   s_en            ,
+  input  [NUM_SLAVES-1:0][DATAW-1:0]        s_axis_tdata    ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tvalid   ,
+  output [NUM_SLAVES-1:0]                   s_axis_tready   ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tuser    ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tlast    ,
+  input  [NUM_SLAVES-1:0][(DATAW/8)-1:0]    s_axis_tstrb    ,
+  input  [NUM_SLAVES-1:0][(DATAW/8)-1:0]    s_axis_tkeep    ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tid      ,
+  input  [NUM_SLAVES-1:0]                   s_axis_tdest    ,
+
+  output [DATAW-1:0]                        m_axis_tdata   ,
+  output                                    m_axis_tvalid  ,
+  input                                     m_axis_tready  ,
+  output                                    m_axis_tuser   ,
+  output                                    m_axis_tlast   ,
+  output [(DATAW/8)-1:0]                    m_axis_tstrb   ,
+  output [(DATAW/8)-1:0]                    m_axis_tkeep   ,
+  output                                    m_axis_tid     ,
+  output                                    m_axis_tdest 
+);
+
+  integer i;
+  always @(*) begin
+    m_axis_tvalid = 0;
+    m_axis_tdata  = 0;
+    for (i = 0; i < NUM_SLAVES; i = i + 1) begin
+      if (s_en[i] && s_axis_tvalid[i]) begin
+        m_axis_tdata  = s_axis_tdata[i];
+        m_axis_tvalid = s_axis_tvalid[i];
+        m_axis_tuser  = s_axis_tuser[i];
+        m_axis_tlast  = s_axis_tlast[i];
+        m_axis_tstrb  = s_axis_tstrb[i];
+        m_axis_tkeep  = s_axis_tkeep[i];
+        m_axis_tid    = s_axis_tid[i];
+        m_axis_tdest  = s_axis_tdest[i];
+      end
+    end
+  end
+
+  assign s_axis_tready = {NUM_SLAVES{m_axis_tready}};
+
+endmodule
