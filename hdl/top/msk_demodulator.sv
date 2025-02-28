@@ -1,24 +1,22 @@
 module msk_demodulator (
-    input  logic        clk,          // 200 MHz system clock
+    input  logic        clk,          // 800 MHz system clock
     input  logic        reset_n,      // Active-low reset
-    input  logic signed [15:0] i_in,  // In-phase (I) input from real_to_iq
-    input  logic signed [15:0] q_in,  // Quadrature (Q) input from real_to_iq
+    input  logic signed [15:0] i_in,  // In-phase (I) input from if_to_iq
+    input  logic signed [15:0] q_in,  // Quadrature (Q) input from if_to_iq
     output logic        data_out      // Recovered binary data
 );
 
-    // Symbol timing parameters
-    localparam int SAMPLES_PER_SYM = 80; // Based on 10 MHz symbol rate (200 MHz / 10 MHz)
+    localparam int SAMPLES_PER_SYM = 80; // Symbol rate 10 MHz (800 MHz / 10 MHz)
 
-    // Registers for phase tracking
     logic signed [31:0] phase_prev, phase_curr;
     logic signed [31:0] phase_diff;
     integer sample_count;
 
-    // Function to compute atan2 in fixed-point format
+    // Compute atan2 in fixed-point format
     function signed [31:0] atan2_fixed(input signed [15:0] y, input signed [15:0] x);
         real phase_radians;
-        phase_radians = $atan2(real'(y), real'(x)); // Compute arctan2 in radians
-        return int'(phase_radians * (2.0**30) / 3.14159265); // Scale to fixed-point (Q30 format)
+        phase_radians = $atan2(real'(y), real'(x)); // Compute atan2 in radians
+        return int'(phase_radians * (2.0**30) / 3.14159265); // Scale to Q30 fixed-point
     endfunction
 
     always_ff @(posedge clk or negedge reset_n) begin
@@ -29,7 +27,7 @@ module msk_demodulator (
             sample_count <= 0;
             data_out <= 0;
         end else begin
-            // Update phase
+            // Compute phase difference
             phase_prev <= phase_curr;
             phase_curr <= atan2_fixed(q_in, i_in);
             phase_diff <= phase_curr - phase_prev;
@@ -40,16 +38,11 @@ module msk_demodulator (
             else if (phase_diff < -(2**30)) 
                 phase_diff <= phase_diff + (2**31);
 
-            // Symbol timing: Sample at the middle of a symbol period
+            // Sample at the middle of each symbol
             sample_count <= sample_count + 1;
-            if (sample_count >= 40) begin
+            if (sample_count >= 40) begin // Midpoint of 80-cycle symbol
                 sample_count <= 0;
-
-                // Make a decision based on phase difference
-                if (phase_diff > 0)
-                    data_out <= 1;
-                else
-                    data_out <= 0;
+                data_out <= (phase_diff > 0) ? 1 : 0; // Decision rule
             end
         end
     end
