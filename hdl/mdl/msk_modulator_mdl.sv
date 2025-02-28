@@ -1,4 +1,4 @@
-module msk_modulator #(
+module msk_modulator_mdl #(
     parameter real FS = 800.0e6,  // Sample rate (Hz)
     parameter real F_SYM = 10.0e6 // Symbol rate (Hz)
 )(

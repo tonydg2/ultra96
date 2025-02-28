@@ -18,7 +18,7 @@ module msk_tb;
     //always #625ps clk = ~clk; // 800 MHz
 
     // DUTs (Device Under Test)
-    msk_modulator #(
+    msk_modulator_mdl #(
         .FS(200.0e6)
     ) msk_modulator_inst (
         .clk(clk),
@@ -44,7 +44,7 @@ module msk_tb;
         .q_out(q_demod)
     );
 
-    msk_demodulator #(
+    msk_demodulator_mdl #(
         .FS(200.0e6)
     ) msk_demodulator_inst (
         .clk(clk),
