@@ -1,23 +1,33 @@
-module msk_demodulator (
-    input  logic        clk,          // 800 MHz system clock
-    input  logic        reset_n,      // Active-low reset
-    input  logic signed [15:0] i_in,  // In-phase (I) input from if_to_iq
-    input  logic signed [15:0] q_in,  // Quadrature (Q) input from if_to_iq
-    output logic        data_out      // Recovered binary data
+module msk_demodulator #(
+    parameter real FS = 800.0e6,  // Sample rate (Hz)
+    parameter real F_SYM = 10.0e6 // Symbol rate (Hz)
+)(
+    input logic clk,
+    input logic reset_n,
+    input int   midpoint_adj,
+    input logic signed [15:0] i_in,  // In-phase (I) input from if_to_iq
+    input logic signed [15:0] q_in,  // Quadrature (Q) input from if_to_iq
+    output logic data_out            // Recovered binary data
 );
 
-    localparam int SAMPLES_PER_SYM = 80; // Symbol rate 10 MHz (800 MHz / 10 MHz)
+    // Compute number of samples per symbol
+    localparam int SAMPLES_PER_SYM = int'(FS / F_SYM);
+    
+    // Compute symbol sampling midpoint
+    localparam int SAMPLE_MIDPOINT = (SAMPLES_PER_SYM / 2);
 
     logic signed [31:0] phase_prev, phase_curr;
     logic signed [31:0] phase_diff;
-    integer sample_count;
+    integer sample_count, midpoint;
 
     // Compute atan2 in fixed-point format
-    function signed [31:0] atan2_fixed(input signed [15:0] y, input signed [15:0] x);
-        real phase_radians;
+    function automatic signed [31:0] atan2_fixed(input signed [15:0] y, input signed [15:0] x);
+        automatic real phase_radians;
         phase_radians = $atan2(real'(y), real'(x)); // Compute atan2 in radians
         return int'(phase_radians * (2.0**30) / 3.14159265); // Scale to Q30 fixed-point
     endfunction
+
+    assign midpoint = SAMPLE_MIDPOINT + midpoint_adj;
 
     always_ff @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
@@ -38,9 +48,9 @@ module msk_demodulator (
             else if (phase_diff < -(2**30)) 
                 phase_diff <= phase_diff + (2**31);
 
-            // Sample at the middle of each symbol
+            // Sample at the calculated midpoint
             sample_count <= sample_count + 1;
-            if (sample_count >= 39) begin // Midpoint of 80-cycle symbol
+            if (sample_count >= midpoint) begin // Midpoint dynamically computed
                 sample_count <= 0;
                 data_out <= (phase_diff > 0) ? 1 : 0; // Decision rule
             end

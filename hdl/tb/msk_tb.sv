@@ -14,11 +14,13 @@ module msk_tb;
     logic signed [15:0] real_out;
 
     // Clock generation (200 MHz)
-    //always #2.5 clk = ~clk; // 5 ns period (200 MHz)
-    always #625ps clk = ~clk; // 800 MHz
+    always #2.5ns clk = ~clk; // 5 ns period (200 MHz)
+    //always #625ps clk = ~clk; // 800 MHz
 
     // DUTs (Device Under Test)
-    msk_modulator msk_modulator_inst (
+    msk_modulator #(
+        .FS(200.0e6)
+    ) msk_modulator_inst (
         .clk(clk),
         .reset_n(reset_n),
         .data_in(data_in),
@@ -42,9 +44,12 @@ module msk_tb;
         .q_out(q_demod)
     );
 
-    msk_demodulator msk_demodulator_inst (
+    msk_demodulator #(
+        .FS(200.0e6)
+    ) msk_demodulator_inst (
         .clk(clk),
         .reset_n(reset_n),
+        .midpoint_adj(-1),
         .i_in(i_out),
         .q_in(q_out),
         .data_out(demod_data)
@@ -84,7 +89,7 @@ module msk_tb;
             // Send bits serially (each bit lasts 20 clock cycles, assuming 10 MHz symbol rate)
             for (int j = 0; j < 8; j = j + 1) begin
                 data_in = test_vector[i][7 - j]; // MSB first
-                repeat (80) @(posedge clk); // Hold for 20 clock cycles
+                repeat (20) @(posedge clk); // Hold for 20 clock cycles
             end
         end
 
