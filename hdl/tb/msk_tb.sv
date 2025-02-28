@@ -54,8 +54,8 @@ module msk_tb;
     // Test vector
     integer file;
     integer i;
-    logic [7:0] test_vector[0:31] = '{0, 8'hff, 0, 0, 0, 0, 0, 0, 
-                                      0, 0, 0, 0, 0, 0, 0, 0,
+    logic [7:0] test_vector[0:31] = '{8'h10, 8'h10, 0, 0, 0, 8'h33, 0, 0, 
+                                      0, 8'hff, 8'hff, 8'hff, 8'hff, 8'h1a, 8'h01, 0,
                                       0, 0, 0, 0, 0, 0, 0, 0,
                                       0, 0, 0, 0, 0, 0, 0, 0};
 //    logic [7:0] test_vector[0:31] = '{8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 

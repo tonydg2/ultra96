@@ -40,7 +40,7 @@ module msk_demodulator (
 
             // Sample at the middle of each symbol
             sample_count <= sample_count + 1;
-            if (sample_count >= 40) begin // Midpoint of 80-cycle symbol
+            if (sample_count >= 39) begin // Midpoint of 80-cycle symbol
                 sample_count <= 0;
                 data_out <= (phase_diff > 0) ? 1 : 0; // Decision rule
             end

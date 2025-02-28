@@ -9,4 +9,4 @@ restart
 
 log -r *
 
-run 4us
+run 40us
