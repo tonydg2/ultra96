@@ -1,9 +1,12 @@
 rm -rf work
-vcom  ../hdl/common/2008/led_cnt_vhd08.vhd  -2008 -work work
-vlog  ../hdl/tb/led_cnt_tb.sv -sv -work work
+vlog  ../hdl/top/real_to_iq.sv    -sv -work work
+vlog  ../hdl/top/iq_to_real.sv    -sv -work work
+vlog  ../hdl/top/msk_modulator.sv -sv -work work
+vlog  ../hdl/top/msk_demodulator.sv -sv -work work
+vlog  ../hdl/tb/msk_tb.sv         -sv -work work
 
 restart
 
 log -r *
 
-run 10us
+run 4us
