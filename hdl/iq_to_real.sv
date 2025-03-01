@@ -1,21 +1,19 @@
-module iq_to_real (
-    input  logic        clk,           // 200 MHz system clock
-    input  logic        reset_n,       // Active-low reset
-    input  logic signed [15:0] i_in,   // In-phase input (I)
-    input  logic signed [15:0] q_in,   // Quadrature input (Q)
-    output logic signed [15:0] real_out // Real-valued IF output
+module iq_to_real #(
+    parameter real FS = 800.0e6,  // Sample rate (Hz)
+    parameter real F_SYM = 10.0e6 // Symbol rate (Hz)
+)(
+    input logic clk,
+    input logic reset_n,
+    input logic signed [15:0] i_in, // Baseband I input
+    input logic signed [15:0] q_in, // Baseband Q input
+    output logic signed [15:0] real_out // Real-valued output signal
 );
 
-    // Parameters for IF frequency and sampling rate
-    localparam real FS_REAL = 800.0e6;  // Sampling rate
-    localparam real F_IF_REAL = 50.0e6; // Intermediate Frequency
+    // Compute phase step for quadrature signal reconstruction
+    localparam int PHASE_STEP = int'((0.25 * F_SYM) * (2.0**32) / FS);
 
-    // Compute phase step using real arithmetic first
-    localparam int PHASE_STEP = int'((F_IF_REAL * (2.0**32)) / FS_REAL);
+    logic [31:0] phase_acc;
 
-    // Phase accumulator for NCO
-    logic [31:0] phase_acc=0;
-    
     always_ff @(posedge clk or negedge reset_n) begin
         if (!reset_n)
             phase_acc <= 0;
@@ -23,27 +21,21 @@ module iq_to_real (
             phase_acc <= phase_acc + PHASE_STEP;
     end
 
-    // Generate sine and cosine waveforms for modulation
-    function signed [15:0] sine_wave(input [31:0] phase);
-        real phase_radians;
-        phase_radians = (phase * 2.0 * 3.14159265) / (2.0**32); // Convert fixed-point phase to radians
+    // Floating-point sine and cosine functions (for simulation only)
+    function automatic signed [15:0] sine_wave(input [31:0] phase);
+        automatic real phase_radians;
+        phase_radians = (phase * 2.0 * 3.14159265) / (2.0**32);
         return $signed(32767 * $sin(phase_radians));
     endfunction
 
-    function signed [15:0] cosine_wave(input [31:0] phase);
-        real phase_radians;
+    function automatic signed [15:0] cosine_wave(input [31:0] phase);
+        automatic real phase_radians;
         phase_radians = (phase * 2.0 * 3.14159265) / (2.0**32);
         return $signed(32767 * $cos(phase_radians));
     endfunction
 
-    // Real-valued IF signal generation: I * cos - Q * sin
-    logic signed [15:0] real_o=0;
-    logic signed [31:0] mix_result=0;
     always_ff @(posedge clk) begin
-        mix_result <= (i_in * cosine_wave(phase_acc)) - (q_in * sine_wave(phase_acc));
-        real_o <= mix_result[30:15]; // Scale correctly to 16-bit output
+        real_out <= (i_in * cosine_wave(phase_acc) - q_in * sine_wave(phase_acc)) >>> 14;
     end
-
-  assign real_out = real_o;
 
 endmodule

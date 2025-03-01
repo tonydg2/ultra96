@@ -28,20 +28,24 @@ module msk_tb;
         .q_out(q_out)
     );
 
-    iq_to_real iq_to_real_inst (
+    upconverter_mdl #(
+        .FS(200e6)
+    ) up_conv (
         .clk(clk),
-        .reset_n(reset_n),
-        .i_in(i_out),
-        .q_in(q_out),
-        .real_out(real_out)
+        .reset(~reset_n),
+        .I_data(i_out),
+        .Q_data(q_out),
+        .dac_out(real_out)
     );
 
-    real_to_iq real_to_iq_inst (
+    downconverter_mdl #(
+        .FS(200e6)
+    ) down_conv (
         .clk(clk),
-        .reset_n(reset_n),
-        .real_in(real_out),
-        .i_out(i_demod),
-        .q_out(q_demod)
+        .reset(~reset_n),
+        .adc_in(real_out),
+        .I_out(i_demod),
+        .Q_out(q_demod)
     );
 
     msk_demodulator_mdl #(
@@ -50,8 +54,8 @@ module msk_tb;
         .clk(clk),
         .reset_n(reset_n),
         .midpoint_adj(-1),
-        .i_in(i_out),
-        .q_in(q_out),
+        .i_in(i_demod),
+        .q_in(q_demod),
         .data_out(demod_data)
     );
 

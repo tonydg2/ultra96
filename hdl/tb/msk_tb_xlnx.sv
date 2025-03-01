@@ -1,0 +1,217 @@
+module msk_tb;
+
+    // Clock and reset
+    logic clk;
+    logic reset_n;
+
+    // Binary data input
+    logic data_in,demod_data;
+
+    // I/Q signals
+    logic signed [15:0] i_out, q_out, i_demod, q_demod,dc_I,dc_Q;
+    
+    // Real-valued IF signal
+    logic signed [15:0] real_out;
+
+    // Clock generation (200 MHz)
+    always #2.5ns clk = ~clk; // 5 ns period (200 MHz)
+    //always #625ps clk = ~clk; // 800 MHz
+
+    // DUTs (Device Under Test)
+    msk_modulator_mdl #(
+        .FS(200.0e6)
+    ) msk_modulator_inst (
+        .clk(clk),
+        .reset_n(reset_n),
+        .data_in(data_in),
+        .i_out(i_out),
+        .q_out(q_out)
+    );
+
+    upconverter_mdl #(
+        .FS(200e6)
+    ) up_conv (
+        .clk(clk),
+        .reset(~reset_n),
+        .I_data(i_out),
+        .Q_data(q_out),
+        .dac_out(real_out)
+    );
+
+    downconverter_mdl #(
+        .FS(200e6)
+    ) down_conv (
+        .clk(clk),
+        .reset(~reset_n),
+        .adc_in(real_out),
+        .I_out(dc_I),
+        .Q_out(dc_Q)
+    );
+    
+    logic dc_fifo_I_tvalid, dc_fifo_I_tready, dc_fifo_Q_tvalid, dc_fifo_Q_tready;
+    logic dc_fifo_I_s_tready, dc_fifo_Q_s_tready, dc_fifo_I_s_tvalid,dc_fifo_Q_s_tvalid;
+    logic signed [15:0] dc_fifo_I_tdata, dc_fifo_Q_tdata;
+
+//    axis_data_fifo_16x512 dc_fifo_I (
+//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
+//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
+//      .s_axis_tvalid  (dc_fifo_I_s_tvalid),     // input wire s_axis_tvalid
+//      .s_axis_tready  (dc_fifo_I_s_tready ),   // output wire s_axis_tready
+//      .s_axis_tdata   (dc_I              ),   // input wire [15 : 0] s_axis_tdata
+//      .m_axis_tvalid  (dc_fifo_I_tvalid  ),              // output wire m_axis_tvalid
+//      .m_axis_tready  (dc_fifo_I_tready  ),              // input wire m_axis_tready
+//      .m_axis_tdata   (dc_fifo_I_tdata   ),              // output wire [15 : 0] m_axis_tdata
+//      .almost_empty   (                  ),   // output wire almost_empty
+//      .prog_empty     (                  ),     // output wire prog_empty
+//      .almost_full    (                  ),    // output wire almost_full
+//      .prog_full      (                  )     // output wire prog_full
+//    );
+//
+//    axis_data_fifo_16x512 dc_fifo_Q (
+//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
+//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
+//      .s_axis_tvalid  (dc_fifo_Q_s_tvalid),     // input wire s_axis_tvalid
+//      .s_axis_tready  (dc_fifo_Q_s_tready),   // output wire s_axis_tready
+//      .s_axis_tdata   (dc_Q              ),   // input wire [15 : 0] s_axis_tdata
+//      .m_axis_tvalid  (dc_fifo_Q_tvalid  ),              // output wire m_axis_tvalid
+//      .m_axis_tready  (dc_fifo_Q_tready  ),              // input wire m_axis_tready
+//      .m_axis_tdata   (dc_fifo_Q_tdata   ),              // output wire [15 : 0] m_axis_tdata
+//      .almost_empty   (                  ),   // output wire almost_empty
+//      .prog_empty     (                  ),     // output wire prog_empty
+//      .almost_full    (                  ),    // output wire almost_full
+//      .prog_full      (                  )     // output wire prog_full
+//    );
+
+    logic               fir_I_tvalid, fir_Q_tvalid,fir_I_tready, fir_Q_tready;          
+    logic signed [31:0] fir_I_tdata, fir_Q_tdata;
+
+    fir_lpf fir_lpf_dc_I (
+      .aclk               (clk      ),    // input wire aclk
+      .s_axis_data_tvalid ('1       ),   // input wire s_axis_data_tvalid
+      .s_axis_data_tready (         ), // output wire s_axis_data_tready
+      .s_axis_data_tdata  (dc_I        ),        // input wire [15 : 0] s_axis_data_tdata
+      .m_axis_data_tvalid (         ), // output wire m_axis_data_tvalid
+      .m_axis_data_tdata  (fir_I_tdata      )  // output wire [31 : 0] m_axis_data_tdata
+    );
+
+    fir_lpf fir_lpf_dc_Q (
+      .aclk               (clk      ),    // input wire aclk
+      .s_axis_data_tvalid ('1       ),   // input wire s_axis_data_tvalid
+      .s_axis_data_tready (         ), // output wire s_axis_data_tready
+      .s_axis_data_tdata  (dc_Q     ),        // input wire [15 : 0] s_axis_data_tdata
+      .m_axis_data_tvalid (         ), // output wire m_axis_data_tvalid
+      .m_axis_data_tdata  (fir_Q_tdata      )  // output wire [31 : 0] m_axis_data_tdata
+    );
+
+//    axis_data_fifo_16x512 fir_fifo_I (
+//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
+//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
+//      .s_axis_tvalid  (fir_I_tvalid       ),     // input wire s_axis_tvalid
+//      .s_axis_tready  (fir_I_tready       ),   // output wire s_axis_tready
+//      .s_axis_tdata   (fir_I_tdata              ),   // input wire [15 : 0] s_axis_tdata
+//      .m_axis_tvalid  (                 ),              // output wire m_axis_tvalid
+//      .m_axis_tready  ('1               ),              // input wire m_axis_tready
+//      .m_axis_tdata   (                 ),              // output wire [15 : 0] m_axis_tdata
+//      .almost_empty   (                  ),   // output wire almost_empty
+//      .prog_empty     (                  ),     // output wire prog_empty
+//      .almost_full    (                  ),    // output wire almost_full
+//      .prog_full      (                  )     // output wire prog_full
+//    );
+//
+//    axis_data_fifo_16x512 fir_fifo_Q (
+//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
+//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
+//      .s_axis_tvalid  (fir_Q_tvalid       ),     // input wire s_axis_tvalid
+//      .s_axis_tready  (fir_Q_tready       ),   // output wire s_axis_tready
+//      .s_axis_tdata   (fir_Q_tdata              ),   // input wire [15 : 0] s_axis_tdata
+//      .m_axis_tvalid  (                 ),              // output wire m_axis_tvalid
+//      .m_axis_tready  ('1               ),              // input wire m_axis_tready
+//      .m_axis_tdata   (                 ),              // output wire [15 : 0] m_axis_tdata
+//      .almost_empty   (                  ),   // output wire almost_empty
+//      .prog_empty     (                  ),     // output wire prog_empty
+//      .almost_full    (                  ),    // output wire almost_full
+//      .prog_full      (                  )     // output wire prog_full
+//    );
+
+
+    msk_demodulator_mdl #(
+        .FS(200.0e6)
+    ) msk_demodulator_inst (
+        .clk(clk),
+        .reset_n(reset_n),
+        .midpoint_adj(-1),
+        .i_in(fir_I_tdata[30:15]),
+        .q_in(fir_Q_tdata[30:15]),
+        .data_out(demod_data)
+    );
+
+
+    // Test vector
+    integer file;
+    integer i;
+    logic [7:0] test_vector[0:31] = '{8'h10, 8'h10, 0, 0, 0, 8'h33, 0, 0, 
+                                      0, 8'hff, 8'hff, 8'hff, 8'hff, 8'h1a, 8'h01, 0,
+                                      0, 0, 0, 0, 0, 0, 0, 0,
+                                      0, 0, 0, 0, 0, 0, 0, 0};
+//    logic [7:0] test_vector[0:31] = '{8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 
+//                                      8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA,
+//                                      8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA,
+//                                      8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA, 8'hAA};
+//    logic [7:0] test_vector[0:31] = '{8'hAA, 8'h55, 8'hFF, 8'h00, 8'hCC, 8'h33, 8'h0F, 8'hF0, 
+//                                      8'hA5, 8'h5A, 8'h3C, 8'hC3, 8'h78, 8'h87, 8'hE1, 8'h1E,
+//                                      8'h92, 8'h6D, 8'h4B, 8'hB4, 8'hF7, 8'h08, 8'hD3, 8'h2C,
+//                                      8'h19, 8'hE6, 8'hAC, 8'h53, 8'h07, 8'hF8, 8'hB9, 8'h46};
+
+logic rdy;
+
+initial begin
+  // Initialize signals
+  clk = 0;
+  reset_n = 0;
+  data_in = 0;
+  rdy = 0;
+  dc_fifo_I_s_tvalid =0;
+  dc_fifo_Q_s_tvalid =0;
+
+  // Apply reset
+  #20 reset_n = 1;
+  #100;
+  //wait ((dc_fifo_I_s_tready == 1) && (dc_fifo_Q_s_tready == 1));
+  rdy = 1;  
+  @(posedge clk);
+  dc_fifo_I_s_tvalid = 1;
+  dc_fifo_Q_s_tvalid = 1;
+
+  // Open file for writing real IF data
+  //file = $fopen("msk_real_output.txt", "w");
+  // Feed binary test vector
+  for (i = 0; i < 32; i = i + 1) begin
+      // Send bits serially (each bit lasts 20 clock cycles, assuming 10 MHz symbol rate)
+      for (int j = 0; j < 8; j = j + 1) begin
+          data_in = test_vector[i][7 - j]; // MSB first
+          repeat (20) @(posedge clk); // Hold for 20 clock cycles
+      end
+  end
+  // Run for some extra cycles
+  repeat (100) @(posedge clk);
+  // Close file and end simulation
+  //$fclose(file);
+  //$stop;
+end
+
+    // Write output to file
+  // always @(posedge clk) begin
+  //     if (reset_n) begin
+  //         $fwrite(file, "%d\n", real_out);
+  //     end
+  // end
+
+  // always @(posedge clk) begin
+  //     if (reset_n) begin
+  //         $display("Data In: %b | I: %d | Q: %d | Real: %d | Recovered I: %d | Recovered Q: %d | Demod Data: %b", 
+  //             data_in, i_out, q_out, real_out, i_demod, q_demod, demod_data);
+  //     end
+  // end
+
+
+endmodule
