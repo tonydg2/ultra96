@@ -47,42 +47,7 @@ module msk_tb;
         .I_out(dc_I),
         .Q_out(dc_Q)
     );
-    
-    logic dc_fifo_I_tvalid, dc_fifo_I_tready, dc_fifo_Q_tvalid, dc_fifo_Q_tready;
-    logic dc_fifo_I_s_tready, dc_fifo_Q_s_tready, dc_fifo_I_s_tvalid,dc_fifo_Q_s_tvalid;
-    logic signed [15:0] dc_fifo_I_tdata, dc_fifo_Q_tdata;
 
-//    axis_data_fifo_16x512 dc_fifo_I (
-//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
-//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
-//      .s_axis_tvalid  (dc_fifo_I_s_tvalid),     // input wire s_axis_tvalid
-//      .s_axis_tready  (dc_fifo_I_s_tready ),   // output wire s_axis_tready
-//      .s_axis_tdata   (dc_I              ),   // input wire [15 : 0] s_axis_tdata
-//      .m_axis_tvalid  (dc_fifo_I_tvalid  ),              // output wire m_axis_tvalid
-//      .m_axis_tready  (dc_fifo_I_tready  ),              // input wire m_axis_tready
-//      .m_axis_tdata   (dc_fifo_I_tdata   ),              // output wire [15 : 0] m_axis_tdata
-//      .almost_empty   (                  ),   // output wire almost_empty
-//      .prog_empty     (                  ),     // output wire prog_empty
-//      .almost_full    (                  ),    // output wire almost_full
-//      .prog_full      (                  )     // output wire prog_full
-//    );
-//
-//    axis_data_fifo_16x512 dc_fifo_Q (
-//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
-//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
-//      .s_axis_tvalid  (dc_fifo_Q_s_tvalid),     // input wire s_axis_tvalid
-//      .s_axis_tready  (dc_fifo_Q_s_tready),   // output wire s_axis_tready
-//      .s_axis_tdata   (dc_Q              ),   // input wire [15 : 0] s_axis_tdata
-//      .m_axis_tvalid  (dc_fifo_Q_tvalid  ),              // output wire m_axis_tvalid
-//      .m_axis_tready  (dc_fifo_Q_tready  ),              // input wire m_axis_tready
-//      .m_axis_tdata   (dc_fifo_Q_tdata   ),              // output wire [15 : 0] m_axis_tdata
-//      .almost_empty   (                  ),   // output wire almost_empty
-//      .prog_empty     (                  ),     // output wire prog_empty
-//      .almost_full    (                  ),    // output wire almost_full
-//      .prog_full      (                  )     // output wire prog_full
-//    );
-
-    logic               fir_I_tvalid, fir_Q_tvalid,fir_I_tready, fir_Q_tready;          
     logic signed [31:0] fir_I_tdata, fir_Q_tdata;
 
     fir_lpf fir_lpf_dc_I (
@@ -103,35 +68,6 @@ module msk_tb;
       .m_axis_data_tdata  (fir_Q_tdata      )  // output wire [31 : 0] m_axis_data_tdata
     );
 
-//    axis_data_fifo_16x512 fir_fifo_I (
-//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
-//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
-//      .s_axis_tvalid  (fir_I_tvalid       ),     // input wire s_axis_tvalid
-//      .s_axis_tready  (fir_I_tready       ),   // output wire s_axis_tready
-//      .s_axis_tdata   (fir_I_tdata              ),   // input wire [15 : 0] s_axis_tdata
-//      .m_axis_tvalid  (                 ),              // output wire m_axis_tvalid
-//      .m_axis_tready  ('1               ),              // input wire m_axis_tready
-//      .m_axis_tdata   (                 ),              // output wire [15 : 0] m_axis_tdata
-//      .almost_empty   (                  ),   // output wire almost_empty
-//      .prog_empty     (                  ),     // output wire prog_empty
-//      .almost_full    (                  ),    // output wire almost_full
-//      .prog_full      (                  )     // output wire prog_full
-//    );
-//
-//    axis_data_fifo_16x512 fir_fifo_Q (
-//      .s_axis_aresetn (reset_n           ),            // input wire s_axis_aresetn
-//      .s_axis_aclk    (clk               ),        // input wire s_axis_aclk
-//      .s_axis_tvalid  (fir_Q_tvalid       ),     // input wire s_axis_tvalid
-//      .s_axis_tready  (fir_Q_tready       ),   // output wire s_axis_tready
-//      .s_axis_tdata   (fir_Q_tdata              ),   // input wire [15 : 0] s_axis_tdata
-//      .m_axis_tvalid  (                 ),              // output wire m_axis_tvalid
-//      .m_axis_tready  ('1               ),              // input wire m_axis_tready
-//      .m_axis_tdata   (                 ),              // output wire [15 : 0] m_axis_tdata
-//      .almost_empty   (                  ),   // output wire almost_empty
-//      .prog_empty     (                  ),     // output wire prog_empty
-//      .almost_full    (                  ),    // output wire almost_full
-//      .prog_full      (                  )     // output wire prog_full
-//    );
 
 
     msk_demodulator_mdl #(
@@ -170,8 +106,6 @@ initial begin
   reset_n = 0;
   data_in = 0;
   rdy = 0;
-  dc_fifo_I_s_tvalid =0;
-  dc_fifo_Q_s_tvalid =0;
 
   // Apply reset
   #20 reset_n = 1;
@@ -179,8 +113,6 @@ initial begin
   //wait ((dc_fifo_I_s_tready == 1) && (dc_fifo_Q_s_tready == 1));
   rdy = 1;  
   @(posedge clk);
-  dc_fifo_I_s_tvalid = 1;
-  dc_fifo_Q_s_tvalid = 1;
 
   // Open file for writing real IF data
   //file = $fopen("msk_real_output.txt", "w");
