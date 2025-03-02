@@ -38,14 +38,29 @@ module msk_tb;
         .dac_out()
     );
 
-    duc #(
-        .FS(200e6)
-    ) duc_inst (
-        .clk(clk),
-        .reset(~reset_n),
-        .I_data(i_out),
-        .Q_data(q_out),
-        .dac_out(real_out)
+    //duc #(
+    //    .FS(200e6)
+    //) duc_inst (
+    //    .clk(clk),
+    //    .reset(~reset_n),
+    //    .I_data(i_out),
+    //    .Q_data(q_out),
+    //    .dac_out(real_out)
+    //);
+
+    duc_ddc_top #(
+      .FS(200e6)
+    ) duc_ddc_top_inst (
+      .clk      (clk      ),
+      .reset    (~reset_n ),
+      //DDC
+      .adc_in   (real_out ), // from ADC
+      .I_out    (dc_I     ), // to demod
+      .Q_out    (dc_Q     ), // to demod
+      //DUC
+      .I_in     (i_out    ), // from modulator
+      .Q_in     (q_out    ), // from modulator
+      .dac_out  (real_out )  // to DAC
     );
 
 
@@ -59,15 +74,15 @@ module msk_tb;
         .Q_out()
     );
 
-    ddc #(
-        .FS(200e6)
-    ) ddc_inst (
-        .clk(clk),
-        .reset(~reset_n),
-        .adc_in(real_out),
-        .I_out(dc_I),
-        .Q_out(dc_Q)
-    );
+    //ddc #(
+    //    .FS(200e6)
+    //) ddc_inst (
+    //    .clk(clk),
+    //    .reset(~reset_n),
+    //    .adc_in(real_out),
+    //    .I_out(dc_I),
+    //    .Q_out(dc_Q)
+    //);
 
 
     logic signed [31:0] fir_I_tdata, fir_Q_tdata;

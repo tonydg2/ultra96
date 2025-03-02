@@ -3,21 +3,22 @@ module duc #(
     parameter real IF = 50e6,   // Intermediate frequency in Hz.
     parameter real FS = 200e6   // Sample rate in Hz.
 )(
-    input  logic             clk,
-    input  logic             reset,
-    input  logic signed [15:0] I_data,  // In-phase component.
-    input  logic signed [15:0] Q_data,  // Quadrature component.
-    output logic signed [15:0] dac_out  // Real-valued (digitized) output to DAC.
+    input  logic                clk,
+    input  logic                reset,
+    input  logic signed [15:0]  dds_tdata,
+    input  logic signed [15:0]  I_data,  // In-phase component.
+    input  logic signed [15:0]  Q_data,  // Quadrature component.
+    output logic signed [15:0]  dac_out  // Real-valued (digitized) output to DAC.
 );
 
-  logic [15:0] dds_tdata;
+//  logic [15:0] dds_tdata;
   logic signed [17:0]  dds_sin, dds_cos, q_ext, i_ext;
   logic signed [47:0]  QxSIN, duc_data;
-  dds_50 dds_50_inst (
-    .aclk(clk), // input wire aclk
-    .m_axis_data_tvalid(),  // output wire m_axis_data_tvalid
-    .m_axis_data_tdata(dds_tdata) // output wire [15 : 0] m_axis_data_tdata
-  );
+//  dds_50 dds_50_inst (
+//    .aclk(clk), // input wire aclk
+//    .m_axis_data_tvalid(),  // output wire m_axis_data_tvalid
+//    .m_axis_data_tdata(dds_tdata) // output wire [15 : 0] m_axis_data_tdata
+//  );
 
   assign dds_sin = signed'({dds_tdata[15:8]});
   assign dds_cos = signed'({dds_tdata[7:0]});
