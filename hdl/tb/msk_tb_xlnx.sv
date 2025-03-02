@@ -30,13 +30,24 @@ module msk_tb;
 
     upconverter_mdl #(
         .FS(200e6)
-    ) up_conv (
+    ) duc_mdl (
+        .clk(clk),
+        .reset(~reset_n),
+        .I_data(i_out),
+        .Q_data(q_out),
+        .dac_out()
+    );
+
+    duc #(
+        .FS(200e6)
+    ) duc_inst (
         .clk(clk),
         .reset(~reset_n),
         .I_data(i_out),
         .Q_data(q_out),
         .dac_out(real_out)
     );
+
 
     downconverter_mdl #(
         .FS(200e6)
@@ -75,11 +86,18 @@ module msk_tb;
     ) msk_demodulator_inst (
         .clk(clk),
         .reset_n(reset_n),
-        .midpoint_adj(-1),
+        .midpoint_adj(-3),
         .i_in(fir_I_tdata[30:15]),
         .q_in(fir_Q_tdata[30:15]),
         .data_out(demod_data)
     );
+
+
+
+
+
+
+
 
 
     // Test vector
