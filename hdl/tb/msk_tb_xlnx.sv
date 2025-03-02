@@ -51,13 +51,24 @@ module msk_tb;
 
     downconverter_mdl #(
         .FS(200e6)
-    ) down_conv (
+    ) ddc_mdl (
+        .clk(clk),
+        .reset(~reset_n),
+        .adc_in(real_out),
+        .I_out(),
+        .Q_out()
+    );
+
+    ddc #(
+        .FS(200e6)
+    ) ddc_inst (
         .clk(clk),
         .reset(~reset_n),
         .adc_in(real_out),
         .I_out(dc_I),
         .Q_out(dc_Q)
     );
+
 
     logic signed [31:0] fir_I_tdata, fir_Q_tdata;
 

@@ -25,6 +25,7 @@ module duc #(
   assign i_ext = signed'({I_data});
   assign q_ext = signed'({Q_data});
 
+  // A*B-C
   dsp_macro_AxBmC dsp_QxSIN (
     .CLK  (clk      ),
     .A    (q_ext    ),
