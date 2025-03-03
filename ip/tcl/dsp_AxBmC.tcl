@@ -27,8 +27,7 @@ set_property -dict [list \
   CONFIG.p_width {48} \
   CONFIG.pcin_binarywidth {0} \
   CONFIG.preg_6 {true} \
+  CONFIG.has_ce {true} \
 ] [get_ips $modName]
 
 if {"-gen" in $argv} {generate_target all [get_files $modName.xci]}
-
-

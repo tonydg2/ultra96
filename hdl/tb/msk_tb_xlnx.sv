@@ -24,9 +24,20 @@ module msk_tb;
         .clk(clk),
         .reset_n(reset_n),
         .data_in(data_in),
+        .i_out(),
+        .q_out()
+    );
+
+    msk_mod #(
+        .FS(200.0e6)
+    ) msk_mod_inst (
+        .clk(clk),
+        .reset_n(reset_n),
+        .data_in(data_in),
         .i_out(i_out),
         .q_out(q_out)
     );
+
 
     upconverter_mdl #(
         .FS(200e6)
@@ -118,9 +129,16 @@ module msk_tb;
         .data_out(demod_data)
     );
 
-
-
-
+    msk_demod #(
+        .FS(200.0e6)
+    ) msk_demod_inst (
+        .clk(clk),
+        .reset_n(reset_n),
+        .midpoint_adj(-2),
+        .i_in(fir_I_tdata[30:15]),
+        .q_in(fir_Q_tdata[30:15]),
+        .data_out()
+    );
 
 
 

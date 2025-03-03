@@ -19,6 +19,7 @@ module msk_demodulator_mdl #(
     logic signed [31:0] phase_prev, phase_curr;
     logic signed [31:0] phase_diff;
     integer sample_count, midpoint;
+    logic sample_midpoint_active;
 
     // Compute atan2 in fixed-point format
     function automatic signed [31:0] atan2_fixed(input signed [15:0] y, input signed [15:0] x);
@@ -36,7 +37,9 @@ module msk_demodulator_mdl #(
             phase_diff  <= 0;
             sample_count <= 0;
             data_out <= 0;
+            sample_midpoint_active <= 0;
         end else begin
+            sample_midpoint_active <= 0;
             // Compute phase difference
             phase_prev <= phase_curr;
             phase_curr <= atan2_fixed(q_in, i_in);
@@ -51,6 +54,7 @@ module msk_demodulator_mdl #(
             // Sample at the calculated midpoint
             sample_count <= sample_count + 1;
             if (sample_count >= midpoint) begin // Midpoint dynamically computed
+                sample_midpoint_active <= 1;
                 sample_count <= 0;
                 data_out <= (phase_diff > 0) ? 1 : 0; // Decision rule
             end
