@@ -53,9 +53,12 @@ module msk_demodulator_mdl #(
 
             // Sample at the calculated midpoint
             sample_count <= sample_count + 1;
-            if (sample_count >= midpoint) begin // Midpoint dynamically computed
+            if (sample_count == SAMPLES_PER_SYM-1) begin
+              sample_count <= 0;
+            end 
+            if (sample_count == midpoint) begin // Midpoint dynamically computed
                 sample_midpoint_active <= 1;
-                sample_count <= 0;
+                //sample_count <= 0;
                 data_out <= (phase_diff > 0) ? 1 : 0; // Decision rule
             end
         end

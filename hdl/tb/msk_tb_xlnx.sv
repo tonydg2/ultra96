@@ -123,7 +123,7 @@ module msk_tb;
     ) msk_demodulator_inst (
         .clk(clk),
         .reset_n(reset_n),
-        .midpoint_adj(-3),
+        .midpoint_adj(1),
         .i_in(fir_I_tdata[30:15]),
         .q_in(fir_Q_tdata[30:15]),
         .data_out(demod_data)

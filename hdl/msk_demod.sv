@@ -37,8 +37,11 @@ module msk_demod #(
     end else begin 
       midpoint_active <= 0;
       sample_cnt <= sample_cnt + 1;
-      if (sample_cnt >= midpoint) begin 
+      if (sample_cnt == 19) begin 
         sample_cnt <= 0;
+      end
+      if (sample_cnt == midpoint) begin 
+        //sample_cnt <= 0;
         midpoint_active <= 1;
       end 
     end 
