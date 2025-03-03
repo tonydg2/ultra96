@@ -46,7 +46,7 @@ module msk_demod #(
 
 
   logic signed [17:0] dsp_i_in,dsp_q_in,dsp_ip_in,dsp_qp_in;
-  logic signed [47:0] mult_Q,imag_diff;
+  logic signed [47:0] mult_IxQP,mult_QxIP,imag_diff;
 
   assign dsp_i_in = signed'({i_in});
   assign dsp_q_in = signed'({q_in});
@@ -56,22 +56,24 @@ module msk_demod #(
   //   imag = q_in * I_prev - i_in * Q_prev
   // A*B-C
   dsp_macro_AxBmC IxQP (
-    .CLK  (clk        ),// input wire CLK
+    .CLK  (clk            ),// input wire CLK
     .CE   (midpoint_active),
-    .A    (dsp_i_in   ),// input wire [17 : 0] A
-    .B    (dsp_qp_in  ),// input wire [17 : 0] B
-    .C    ('0         ),// input wire [47 : 0] C
-    .P    (mult_Q     )// output wire [47 : 0] P
+    .A    (dsp_i_in       ),// input wire [17 : 0] A
+    .B    (dsp_qp_in      ),// input wire [17 : 0] B
+    .C    ('0             ),// input wire [47 : 0] C
+    .P    (mult_IxQP      )// output wire [47 : 0] P
   );
 
   dsp_macro_AxBmC QxIP (
-    .CLK  (clk        ),
+    .CLK  (clk            ),
     .CE   (midpoint_active),
-    .A    (dsp_q_in   ),
-    .B    (dsp_ip_in  ),
-    .C    (mult_Q     ),
-    .P    (imag_diff  )
+    .A    (dsp_q_in       ),
+    .B    (dsp_ip_in      ),
+    .C    ('0             ),
+    .P    (mult_QxIP      )
   );
+
+  assign imag_diff = mult_QxIP - mult_IxQP;
 
   assign data_out = (imag_diff >= 0) ? 1:0;
 

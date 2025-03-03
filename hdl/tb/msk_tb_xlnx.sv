@@ -134,7 +134,7 @@ module msk_tb;
     ) msk_demod_inst (
         .clk(clk),
         .reset_n(reset_n),
-        .midpoint_adj(-2),
+        .midpoint_adj(-9),
         .i_in(fir_I_tdata[30:15]),
         .q_in(fir_Q_tdata[30:15]),
         .data_out()
