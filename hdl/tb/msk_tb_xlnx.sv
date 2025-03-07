@@ -129,6 +129,16 @@ module msk_tb;
         .data_out(demod_data)
     );
 
+    gardner_ted_mdl gardner_MDL (
+        .clk(clk),
+        .reset(~reset_n),
+        .I_in(fir_I_tdata[30:15]),
+        .Q_in(fir_Q_tdata[30:15]),
+        .error(),
+        .symbol_valid()
+    );
+
+
     msk_demod #(
         .FS(200.0e6)
     ) msk_demod_inst (

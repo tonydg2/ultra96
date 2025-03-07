@@ -15,6 +15,11 @@ set_property -dict [list \
   CONFIG.Output_Width {32} \
   CONFIG.Quantization {Integer_Coefficients} \
   CONFIG.S_DATA_Has_FIFO {false} \
+  CONFIG.Clock_Frequency {200} \
+  CONFIG.ColumnConfig {12} \
+  CONFIG.Sample_Frequency {200} \
+  CONFIG.Filter_Architecture {Systolic_Multiply_Accumulate} \
 ] [get_ips $modName]
 
 if {"-gen" in $argv} {generate_target all [get_files $modName.xci]}
+
