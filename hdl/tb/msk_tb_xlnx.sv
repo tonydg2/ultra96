@@ -8,25 +8,25 @@ module msk_tb;
     logic data_in,demod_data;
 
     // I/Q signals
-    logic signed [15:0] i_out, q_out, i_demod, q_demod,dc_I,dc_Q;
-    
+    logic signed [15:0] i_out, q_out, i_demod, q_demod,dc_I,dc_Q, i_noisy, q_noisy;
+    logic signed [15:0] i_cfo, q_cfo, i_jitter, q_jitter, i_faded, q_faded, i_nldist, q_nldist;
     // Real-valued IF signal
-    logic signed [15:0] real_out;
+    logic signed [15:0] dac_data;
 
     // Clock generation (200 MHz)
     always #2.5ns clk = ~clk; // 5 ns period (200 MHz)
     //always #625ps clk = ~clk; // 800 MHz
 
     // DUTs (Device Under Test)
-    msk_modulator_mdl #(
-        .FS(200.0e6)
-    ) msk_modulator_inst (
-        .clk(clk),
-        .reset_n(reset_n),
-        .data_in(data_in),
-        .i_out(),
-        .q_out()
-    );
+    //msk_modulator_mdl #(
+    //    .FS(200.0e6)
+    //) msk_modulator_inst (
+    //    .clk(clk),
+    //    .reset_n(reset_n),
+    //    .data_in(data_in),
+    //    .i_out(),
+    //    .q_out()
+    //);
 
     msk_mod #(
         .FS(200.0e6)
@@ -38,16 +38,73 @@ module msk_tb;
         .q_out(q_out)
     );
 
-
-    upconverter_mdl #(
-        .FS(200e6)
-    ) duc_mdl (
-        .clk(clk),
-        .reset(~reset_n),
-        .I_data(i_out),
-        .Q_data(q_out),
-        .dac_out()
+    timing_jitter_mdl #(
+        .JITTER_STD_DEV(0.05)
+    ) jitter_mdl_inst (
+      .clk(clk),
+      .reset(~reset_n),
+      .i_in(i_out),
+      .q_in(q_out),
+      .i_out(i_jitter),
+      .q_out(q_jitter)
     );
+
+    cfo_mdl #(
+        .CFO_HZ(500.0),
+        .FS(200.0e6)
+    ) cfo_mdl_inst (
+      .clk(clk),
+      .reset(~reset_n),
+      .i_in(i_jitter),
+      .q_in(q_jitter),
+      .i_out(i_cfo),
+      .q_out(q_cfo)
+    );
+
+
+    phase_noise_mdl #(
+      .PHASE_NOISE_STD_DEV(0.04)
+    ) phase_noise_mdl_inst (
+      .clk(clk),
+      .reset(~reset_n),
+      .i_in(i_cfo),
+      .q_in(q_cfo),
+      .i_out(i_noisy),
+      .q_out(q_noisy)
+    );
+
+  multipath_fading_mdl #(
+    .NUM_PATHS(3), .DOPPLER_FREQ(100.0), .SAMPLE_RATE(200.0e6), .K_FACTOR(5)
+  ) multipath_fading_mdl_inst (
+    .clk(clk),
+    .reset(~reset_n),
+    .i_in(i_noisy),
+    .q_in(q_noisy),
+    .i_out(i_faded),
+    .q_out(q_faded)
+  );
+
+  nonlinear_distortion_mdl #(
+    .ALPHA(0.005), .P(2.2)
+  ) nonlinear_distortion_mdl_inst (
+    .clk(clk),
+    .reset(~reset_n),
+    .i_in(i_faded),
+    .q_in(q_faded),
+    .i_out(i_nldist),
+    .q_out(q_nldist)
+  );
+
+
+    //upconverter_mdl #(
+    //    .FS(200e6)
+    //) duc_mdl (
+    //    .clk(clk),
+    //    .reset(~reset_n),
+    //    .I_data(i_out),
+    //    .Q_data(q_out),
+    //    .dac_out()
+    //);
 
     //duc #(
     //    .FS(200e6)
@@ -56,7 +113,7 @@ module msk_tb;
     //    .reset(~reset_n),
     //    .I_data(i_out),
     //    .Q_data(q_out),
-    //    .dac_out(real_out)
+    //    .dac_out(dac_data)
     //);
 
     duc_ddc_top #(
@@ -65,32 +122,52 @@ module msk_tb;
       .clk      (clk      ),
       .reset    (~reset_n ),
       //DDC
-      .adc_in   (real_out ), // from ADC
+      .adc_in   (dac_awgn ), // from ADC
       .I_out    (dc_I     ), // to demod
       .Q_out    (dc_Q     ), // to demod
       //DUC
-      .I_in     (i_out    ), // from modulator
-      .Q_in     (q_out    ), // from modulator
-      .dac_out  (real_out )  // to DAC
+      .I_in     (i_nldist  ), // from modulator
+      .Q_in     (q_nldist  ), // from modulator
+      .dac_out  (dac_data )  // to DAC
+    );
+
+  logic signed [15:0] dac_atten, dac_awgn;
+
+    signal_atten_mdl #(
+      .SHIFT_VAL(1),
+      .SCALE_FACTOR(0)
+    ) atten_inst (
+      .signal_in(dac_data),
+      .signal_out(dac_atten)
     );
 
 
-    downconverter_mdl #(
-        .FS(200e6)
-    ) ddc_mdl (
-        .clk(clk),
-        .reset(~reset_n),
-        .adc_in(real_out),
-        .I_out(),
-        .Q_out()
+    awgn_noise_gen_mdl #(
+      .NOISE_STD_DEV(40.0)
+    ) awgn_inst (
+      .clk(clk),
+      .reset(~reset_n),
+      .signal_in(dac_atten),
+      .signal_out(dac_awgn)
     );
+
+
+    //downconverter_mdl #(
+    //  .FS(200e6)
+    //) ddc_mdl (
+    //  .clk(clk),
+    //  .reset(~reset_n),
+    //  .adc_in(dac_data),
+    //  .I_out(),
+    //  .Q_out()
+    //);
 
     //ddc #(
     //    .FS(200e6)
     //) ddc_inst (
     //    .clk(clk),
     //    .reset(~reset_n),
-    //    .adc_in(real_out),
+    //    .adc_in(dac_data),
     //    .I_out(dc_I),
     //    .Q_out(dc_Q)
     //);
@@ -118,16 +195,16 @@ module msk_tb;
 
 
 
-    msk_demodulator_mdl #(
-        .FS(200.0e6)
-    ) msk_demodulator_inst (
-        .clk(clk),
-        .reset_n(reset_n),
-        .midpoint_adj(1),
-        .i_in(fir_I_tdata[30:15]),
-        .q_in(fir_Q_tdata[30:15]),
-        .data_out(demod_data)
-    );
+    //msk_demodulator_mdl #(
+    //    .FS(200.0e6)
+    //) msk_demodulator_inst (
+    //    .clk(clk),
+    //    .reset_n(reset_n),
+    //    .midpoint_adj(1),
+    //    .i_in(fir_I_tdata[30:15]),
+    //    .q_in(fir_Q_tdata[30:15]),
+    //    .data_out(demod_data)
+    //);
 
     gardner_ted_mdl gardner_MDL (
         .clk(clk),
@@ -147,7 +224,7 @@ module msk_tb;
         .midpoint_adj(1),
         .i_in(fir_I_tdata[30:15]),
         .q_in(fir_Q_tdata[30:15]),
-        .data_out()
+        .data_out(demod_data)
     );
 
 
@@ -206,14 +283,14 @@ end
     // Write output to file
   // always @(posedge clk) begin
   //     if (reset_n) begin
-  //         $fwrite(file, "%d\n", real_out);
+  //         $fwrite(file, "%d\n", dac_data);
   //     end
   // end
 
   // always @(posedge clk) begin
   //     if (reset_n) begin
   //         $display("Data In: %b | I: %d | Q: %d | Real: %d | Recovered I: %d | Recovered Q: %d | Demod Data: %b", 
-  //             data_in, i_out, q_out, real_out, i_demod, q_demod, demod_data);
+  //             data_in, i_out, q_out, dac_data, i_demod, q_demod, demod_data);
   //     end
   // end
 
