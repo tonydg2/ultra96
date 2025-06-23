@@ -15,6 +15,10 @@ module phase_noise_mdl #(
     int unsigned rand1, rand2;
 
     always_comb begin
+      if (PHASE_NOISE_STD_DEV == 0.0) begin 
+        i_out <= i_in;
+        q_out <= q_in;
+      end else begin
         // Generate two uniform random numbers (0,1)
         rand1 = $urandom_range(1, 10000);
         rand2 = $urandom_range(1, 10000);
@@ -40,6 +44,7 @@ module phase_noise_mdl #(
         q_out = (q_temp > 32767) ? 16'sh7FFF :
                 (q_temp < -32768) ? 16'sh8000 :
                 signed'(int'(q_temp));
+      end
     end
 
 endmodule

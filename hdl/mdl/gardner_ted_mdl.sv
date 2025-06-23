@@ -8,8 +8,8 @@ module gardner_ted_mdl #(
     input  logic clk,
     input  logic reset,
     // Input oversampled baseband sample components.
-    input  real I_in,
-    input  real Q_in,
+    input  logic signed [15:0]  I_in,
+    input  logic signed [15:0]  Q_in,
     // Timing error output (real-valued).
     output real error,
     // Asserted for one clock cycle when a new error is computed.
@@ -30,8 +30,8 @@ module gardner_ted_mdl #(
             error_reg <= 0.0;
         end else begin
             // Capture the current sample in the array.
-            I_samples[counter] <= I_in;
-            Q_samples[counter] <= Q_in;
+            I_samples[counter] <= real'(I_in);
+            Q_samples[counter] <= real'(Q_in);
             if (counter == OVERSAMPLE_FACTOR - 1) begin
                 // Once a full symbol period is captured, compute the error.
                 // Use sample at MID_POINT as the "on-time" sample.
@@ -47,4 +47,17 @@ module gardner_ted_mdl #(
         end
     end
 
+    int error_int,error_max=0,error_min=0,error_floor=999999999;
+
+    assign error_int = int'(error_reg);
+
+    always_comb begin
+      error_max = (error_int > error_max) ? error_int : error_max;
+      error_min = (error_int < error_min) ? error_int : error_min;
+      error_floor = ((error_int > 0) && (error_int < error_floor)) ? error_int :              // positive and closer to zero
+                    ((error_int < 0) && (error_int > error_floor)) ? error_int : error_floor; // negative and closer to zero
+    end 
+
 endmodule
+
+

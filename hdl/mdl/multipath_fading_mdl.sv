@@ -12,6 +12,13 @@ module multipath_fading_mdl #(
     output logic signed [15:0] q_out  // Faded Quadrature output
 );
 
+
+generate
+  if ((NUM_PATHS == 0) && (DOPPLER_FREQ == 0.0) && (K_FACTOR == 0.0)) begin
+    assign i_out = i_in;
+    assign q_out = q_in;
+  end else begin 
+
     // Arrays for path delays and gains
     real path_gain[NUM_PATHS];
     real doppler_phase[NUM_PATHS];
@@ -92,5 +99,9 @@ module multipath_fading_mdl #(
                      signed'(int'(q_temp));
         end
     end
+
+  end 
+
+endgenerate
 
 endmodule

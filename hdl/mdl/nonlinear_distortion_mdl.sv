@@ -20,6 +20,9 @@ module nonlinear_distortion_mdl #(
         if (reset) begin
             i_out <= 16'sd0;
             q_out <= 16'sd0;
+        end else if ((ALPHA == 0.0) && (P == 0.0)) begin
+            i_out <= i_in;
+            q_out <= q_in;
         end else begin
             // Scale ALPHA down to ensure balanced distortion
             ALPHA_SCALED = ALPHA * 1e-6;

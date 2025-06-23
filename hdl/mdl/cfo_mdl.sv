@@ -19,6 +19,9 @@ module cfo_mdl #(
             phase <= 0.0;
             i_out <= 16'sd0;
             q_out <= 16'sd0;
+        end else if (CFO_HZ == 0.0) begin
+            i_out <= i_in;
+            q_out <= q_in;
         end else begin
             // Compute phase step per sample
             phase_step = 2.0 * 3.141592653589793 * CFO_HZ / FS;

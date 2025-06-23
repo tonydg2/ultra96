@@ -18,7 +18,16 @@ module msk_tb;
     always #2.5ns clk = ~clk; // 5 ns period (200 MHz)
     //always #625ps clk = ~clk; // 800 MHz
 
-
+    // DUTs (Device Under Test)
+    //msk_modulator_mdl #(
+    //    .FS(200.0e6)
+    //) msk_modulator_inst (
+    //    .clk(clk),
+    //    .reset_n(reset_n),
+    //    .data_in(data_in),
+    //    .i_out(),
+    //    .q_out()
+    //);
 
     msk_mod #(
         .FS(200.0e6)
@@ -30,21 +39,21 @@ module msk_tb;
         .q_out(q_out)
     );
 
-//    timing_jitter_mdl #(
-//        .JITTER_STD_DEV(0.05)
-//    ) jitter_mdl_inst (
-//      .clk(clk),
-//      .reset(~reset_n),
-//      .i_in(i_out),
-//      .q_in(q_out),
-//      .i_out(),
-//      .q_out()
-//    );
+    timing_jitter_mdl #(
+        .JITTER_STD_DEV(0.05)
+    ) jitter_mdl_inst (
+      .clk(clk),
+      .reset(~reset_n),
+      .i_in(i_out),
+      .q_in(q_out),
+      .i_out(),
+      .q_out()
+    );
 
     timing_jitter_drift_mdl #(
-        .INITIAL_OFFSET(0.0),
-        .DRIFT_PER_SAMPLE(0.000),
-        .ENABLE_RANDOM_JITTER(0)
+        .INITIAL_OFFSET(0.5),
+        .DRIFT_PER_SAMPLE(0.001),
+        .ENABLE_RANDOM_JITTER(1)
     ) jitter_drift_mdl_inst (
       .clk(clk),
       .reset(~reset_n),
@@ -55,7 +64,7 @@ module msk_tb;
     );
 
     cfo_mdl #(
-        .CFO_HZ(0),//500.0),
+        .CFO_HZ(500.0),
         .FS(200.0e6)
     ) cfo_mdl_inst (
       .clk(clk),
@@ -68,7 +77,7 @@ module msk_tb;
 
 
     phase_noise_mdl #(
-      .PHASE_NOISE_STD_DEV(0)//(0.04)
+      .PHASE_NOISE_STD_DEV(0.04)
     ) phase_noise_mdl_inst (
       .clk(clk),
       .reset(~reset_n),
@@ -79,8 +88,7 @@ module msk_tb;
     );
 
     multipath_fading_mdl #(
-    //  .NUM_PATHS(3), .DOPPLER_FREQ(100.0), .SAMPLE_RATE(200.0e6), .K_FACTOR(5)
-      .NUM_PATHS(0), .DOPPLER_FREQ(0.0), .SAMPLE_RATE(200.0e6), .K_FACTOR(0)
+      .NUM_PATHS(3), .DOPPLER_FREQ(100.0), .SAMPLE_RATE(200.0e6), .K_FACTOR(5)
     ) multipath_fading_mdl_inst (
       .clk(clk),
       .reset(~reset_n),
@@ -91,8 +99,7 @@ module msk_tb;
     );
 
     nonlinear_distortion_mdl #(
-      //.ALPHA(0.005), .P(2.0)
-      .ALPHA(0.0), .P(0.0)
+      .ALPHA(0.005), .P(2.0)
     ) nonlinear_distortion_mdl_inst (
       .clk(clk),
       .reset(~reset_n),
@@ -101,6 +108,27 @@ module msk_tb;
       .i_out(i_nldist),
       .q_out(q_nldist)
     );
+
+
+    //upconverter_mdl #(
+    //    .FS(200e6)
+    //) duc_mdl (
+    //    .clk(clk),
+    //    .reset(~reset_n),
+    //    .I_data(i_out),
+    //    .Q_data(q_out),
+    //    .dac_out()
+    //);
+
+    //duc #(
+    //    .FS(200e6)
+    //) duc_inst (
+    //    .clk(clk),
+    //    .reset(~reset_n),
+    //    .I_data(i_out),
+    //    .Q_data(q_out),
+    //    .dac_out(dac_data)
+    //);
 
     duc_ddc_top #(
       .FS(200e6)
@@ -120,7 +148,7 @@ module msk_tb;
   logic signed [15:0] dac_atten, dac_awgn;
 
     signal_atten_mdl #(
-      .SHIFT_VAL(0),
+      .SHIFT_VAL(1),
       .SCALE_FACTOR(0)
     ) dac_atten_inst (
       .signal_in(dac_data),
@@ -129,13 +157,35 @@ module msk_tb;
 
 
     awgn_noise_gen_mdl #(
-      .NOISE_STD_DEV(0)//(40.0)
+      .NOISE_STD_DEV(40.0)
     ) awgn_inst (
       .clk(clk),
       .reset(~reset_n),
       .signal_in(dac_atten),
       .signal_out(dac_awgn)
     );
+
+
+    //downconverter_mdl #(
+    //  .FS(200e6)
+    //) ddc_mdl (
+    //  .clk(clk),
+    //  .reset(~reset_n),
+    //  .adc_in(dac_data),
+    //  .I_out(),
+    //  .Q_out()
+    //);
+
+    //ddc #(
+    //    .FS(200e6)
+    //) ddc_inst (
+    //    .clk(clk),
+    //    .reset(~reset_n),
+    //    .adc_in(dac_data),
+    //    .I_out(dc_I),
+    //    .Q_out(dc_Q)
+    //);
+
 
     logic signed [31:0] fir_I_tdata, fir_Q_tdata;
 
@@ -160,27 +210,26 @@ module msk_tb;
     assign i_fir = fir_I_tdata[30:15];
     assign q_fir = fir_Q_tdata[30:15];
 
-    real ted_error;
+    //msk_demodulator_mdl #(
+    //    .FS(200.0e6)
+    //) msk_demodulator_inst (
+    //    .clk(clk),
+    //    .reset_n(reset_n),
+    //    .midpoint_adj(1),
+    //    .i_in(fir_I_tdata[30:15]),
+    //    .q_in(fir_Q_tdata[30:15]),
+    //    .data_out(demod_data)
+    //);
 
     gardner_ted_mdl #(
-      .MID_POINT(16)
+      .MID_POINT(10)
     ) gardner_MDL (
         .clk(clk),
         .reset(~reset_n),
         .I_in(i_fir),
         .Q_in(q_fir),
-        .error(ted_error),
+        .error(),
         .symbol_valid()
-    );
-
-    loop_filter_mdl #(
-      .Kp(0.05),
-      .Ki(0.001)
-    ) loop_filter_mdl_inst (
-        .clk(clk),
-        .reset(~reset_n),
-        .error(ted_error),
-        .control_signal()
     );
 
 
@@ -194,6 +243,9 @@ module msk_tb;
         .q_in(q_fir),
         .data_out(demod_data)
     );
+
+
+
 
 
     // Test vector
@@ -242,9 +294,24 @@ initial begin
   end
   // Run for some extra cycles
   repeat (100) @(posedge clk);
-
+  // Close file and end simulation
+  //$fclose(file);
+  //$stop;
 end
 
+    // Write output to file
+  // always @(posedge clk) begin
+  //     if (reset_n) begin
+  //         $fwrite(file, "%d\n", dac_data);
+  //     end
+  // end
+
+  // always @(posedge clk) begin
+  //     if (reset_n) begin
+  //         $display("Data In: %b | I: %d | Q: %d | Real: %d | Recovered I: %d | Recovered Q: %d | Demod Data: %b", 
+  //             data_in, i_out, q_out, dac_data, i_demod, q_demod, demod_data);
+  //     end
+  // end
 
 
 endmodule

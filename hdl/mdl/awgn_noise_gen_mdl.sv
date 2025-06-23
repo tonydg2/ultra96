@@ -14,6 +14,8 @@ module awgn_noise_gen_mdl #(
     always_ff @(posedge clk or posedge reset) begin
         if (reset) begin
             signal_out <= 16'sd0;
+        end else if ((NOISE_STD_DEV == 0.0)) begin
+            signal_out <= signal_in;
         end else begin
             // Generate two uniform random numbers in (0,1)
             rand1 = $urandom_range(1, 10000);  
